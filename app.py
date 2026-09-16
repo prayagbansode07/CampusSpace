@@ -1,3 +1,4 @@
+from urllib.error import HTTPError
 import json
 from urllib.request import Request, urlopen
 import os
@@ -49,8 +50,14 @@ def send_email_via_resend(receiver_email, subject, body):
         method="POST"
     )
 
-    with urlopen(request, timeout=20) as response:
-        response.read()
+    try:
+        with urlopen(request, timeout=20) as response:
+            response.read()
+
+    except HTTPError as error:
+        error_body = error.read().decode("utf-8")
+        print("RESEND ERROR:", error_body)
+        raise
 
 def send_otp_email(receiver_email, otp):
 
