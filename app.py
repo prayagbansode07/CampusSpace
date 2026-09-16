@@ -201,7 +201,18 @@ def init_db():
             ALTER TABLE users
             ADD COLUMN faculty_status TEXT DEFAULT 'none'
         """)
+        booking_columns = [
+        row[1]
+        for row in connection.execute(
+            "PRAGMA table_info(bookings)"
+        ).fetchall()
+    ]
 
+    if "status" not in booking_columns:
+        connection.execute("""
+            ALTER TABLE bookings
+            ADD COLUMN status TEXT DEFAULT 'confirmed'
+        """)
     connection.commit()
     connection.close()
 
