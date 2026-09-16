@@ -189,6 +189,19 @@ def init_db():
         )
     """)
 
+    user_columns = [
+        row[1]
+        for row in connection.execute(
+            "PRAGMA table_info(users)"
+        ).fetchall()
+    ]
+
+    if "faculty_status" not in user_columns:
+        connection.execute("""
+            ALTER TABLE users
+            ADD COLUMN faculty_status TEXT DEFAULT 'none'
+        """)
+
     connection.commit()
     connection.close()
 
