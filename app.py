@@ -1,3 +1,5 @@
+import json
+from urllib.request import Request, urlopen
 import os
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -24,18 +26,37 @@ def get_db():
     connection.row_factory = sqlite3.Row
     return connection
 
+def send_email_via_resend(receiver_email, subject, body):
+    api_key = os.environ.get("RESEND_API_KEY")
+
+    if not api_key:
+        raise Exception("RESEND_API_KEY is not configured.")
+
+    email_data = {
+        "from": "CampusSpace <onboarding@resend.dev>",
+        "to": [receiver_email],
+        "subject": subject,
+        "text": body
+    }
+
+    request = Request(
+        "https://api.resend.com/emails",
+        data=json.dumps(email_data).encode("utf-8"),
+        headers={
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json"
+        },
+        method="POST"
+    )
+
+    with urlopen(request, timeout=20) as response:
+        response.read()
+
 def send_otp_email(receiver_email, otp):
 
-    sender_email = os.environ.get("CAMPUSSPACE_EMAIL")
-    sender_app_password = os.environ.get("CAMPUSSPACE_EMAIL_PASSWORD")
+    subject = "CampusSpace Email Verification OTP"
 
-    message = EmailMessage()
-
-    message["Subject"] = "CampusSpace Email Verification OTP"
-    message["From"] = sender_email
-    message["To"] = receiver_email
-
-    message.set_content(f"""
+    body = f"""
 Hello,
 
 Your CampusSpace verification OTP is:
@@ -48,34 +69,27 @@ If you did not request this registration, you can ignore this email.
 
 Regards,
 CampusSpace
-""")
+"""
 
-    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as smtp:
-        smtp.login(sender_email, sender_app_password)
-        smtp.send_message(message)
+    send_email_via_resend(receiver_email, subject, body)
 
 def send_admin_invitation_email(receiver_email, token):
 
     sender_email = os.environ.get("CAMPUSSPACE_EMAIL")
-    sender_app_password = os.environ.get("CAMPUSSPACE_EMAIL_PASSWORD")
 
     invitation_link = (
-        "http://127.0.0.1:5000/accept-admin-invitation/"
+        "https://campusspace-gota.onrender.com/accept-admin-invitation/"
         + token
     )
 
-    message = EmailMessage()
+    subject = "CampusSpace Admin Invitation"
 
-    message["Subject"] = "CampusSpace Admin Invitation"
-    message["From"] = sender_email
-    message["To"] = receiver_email
-
-    message.set_content(f"""
+    body = f"""
 Hello,
 
 You have been invited to become an administrator of CampusSpace.
 
-To accept the invitation, open this link:
+Accept the invitation using this link:
 
 {invitation_link}
 
@@ -83,11 +97,9 @@ This invitation is valid for 24 hours.
 
 Regards,
 CampusSpace
-""")
+"""
 
-    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as smtp:
-        smtp.login(sender_email, sender_app_password)
-        smtp.send_message(message)
+    send_email_via_resend(receiver_email, subject, body)
 
 def init_db():
     connection = get_db()
