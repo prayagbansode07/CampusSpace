@@ -45,7 +45,8 @@ def send_email_via_resend(receiver_email, subject, body):
         data=json.dumps(email_data).encode("utf-8"),
         headers={
             "Authorization": f"Bearer {api_key}",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "User-Agent": "CampusSpace/1.0"
         },
         method="POST"
     )
