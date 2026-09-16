@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accept Admin Invitation - CampusSpace</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #eef2f7, #f8fafc);
+            color: #172033;
+            min-height: 100vh;
+        }
+
+        nav {
+            background: #172033;
+            padding: 18px 7%;
+        }
+
+        .logo {
+            color: white;
+            text-decoration: none;
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        main {
+            width: 90%;
+            max-width: 620px;
+            margin: 55px auto;
+        }
+
+        .card {
+            background: white;
+            border: 1px solid #dfe3e8;
+            border-radius: 16px;
+            padding: 35px;
+            box-shadow: 0 8px 25px rgba(23, 32, 51, 0.08);
+        }
+
+        h1 {
+            margin: 0 0 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #667085;
+            line-height: 1.6;
+            margin-bottom: 28px;
+        }
+
+        .field {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        input {
+            width: 100%;
+            padding: 13px 14px;
+            border: 1px solid #cbd2dc;
+            border-radius: 8px;
+            font-size: 15px;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: #172033;
+            box-shadow: 0 0 0 3px rgba(23, 32, 51, 0.10);
+        }
+
+        .password-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .password-wrapper input {
+            padding-right: 70px;
+        }
+
+        .show-password {
+            position: absolute;
+            right: 10px;
+            top: 0;
+            width: auto;
+            margin: 0;
+            padding: 5px 8px;
+            background: transparent;
+            color: #172033;
+            border: none;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .show-password:hover {
+            background: transparent;
+            color: #667085;
+            transform: none;
+        }
+
+        .submit-btn {
+            width: 100%;
+            margin-top: 5px;
+            padding: 13px;
+            background: #172033;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .submit-btn:hover {
+            background: #27334a;
+        }
+
+        .note {
+            margin-top: 22px;
+            padding: 14px;
+            background: #f4f6f8;
+            border-left: 4px solid #172033;
+            color: #667085;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 600px) {
+            nav {
+                padding: 16px 5%;
+            }
+
+            .logo {
+                font-size: 21px;
+            }
+
+            main {
+                width: 92%;
+                margin: 35px auto;
+            }
+
+            .card {
+                padding: 25px 20px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+        }
+        .flash-container {
+            margin-bottom: 20px;
+        }
+
+        .flash-message {
+            padding: 13px 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 10px;
+            border: 1px solid transparent;
+        }
+
+        .flash-success {
+            background: #eaf7ee;
+            color: #176b35;
+            border-color: #b8e2c4;
+        }
+
+        .flash-error {
+            background: #fff0f0;
+            color: #a12626;
+            border-color: #f0bcbc;
+        }
+
+        .flash-info {
+            background: #eef4ff;
+            color: #214f9b;
+            border-color: #c5d7ff;
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav>
+        <a href="/admin" class="logo">CampusSpace</a>
+    </nav>
+
+    <main>
+        <div class="card">
+            <h1>Accept Admin Invitation</h1>
+
+            <p class="subtitle">
+                Create your CampusSpace administrator account by completing
+                the details below.
+            </p>
+            <div class="flash-container">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="flash-message flash-{{ category }}">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+            </div>
+            <form method="POST">
+
+                <div class="field">
+                    <label for="name">Full Name</label>
+                    <input
+                        type="text"
+                        id="name"
+                        name="name"
+                        placeholder="Enter your full name"
+                        required
+                    >
+                </div>
+
+                <div class="field">
+                    <label for="password">Password</label>
+
+                    <div class="password-wrapper">
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            placeholder="Create a password"
+                            required
+                        >
+
+                        <button
+                            type="button"
+                            class="show-password"
+                            onclick="togglePassword('password', this)"
+                        >
+                            Show
+                        </button>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label for="confirm_password">Confirm Password</label>
+
+                    <div class="password-wrapper">
+                        <input
+                            type="password"
+                            id="confirm_password"
+                            name="confirm_password"
+                            placeholder="Re-enter your password"
+                            required
+                        >
+
+                        <button
+                            type="button"
+                            class="show-password"
+                            onclick="togglePassword('confirm_password', this)"
+                        >
+                            Show
+                        </button>
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-btn">
+                    Accept Invitation
+                </button>
+            </form>
+
+            <div class="note">
+                Your password must be at least 8 characters long and contain
+                at least one number.
+            </div>
+        </div>
+    </main>
+
+    <script>
+        function togglePassword(inputId, button) {
+            const input = document.getElementById(inputId);
+
+            if (input.type === "password") {
+                input.type = "text";
+                button.textContent = "Hide";
+            } else {
+                input.type = "password";
+                button.textContent = "Show";
+            }
+        }
+    </script>
+
+</body>
+</html>

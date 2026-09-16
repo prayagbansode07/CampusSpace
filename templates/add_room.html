@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Add Room | CampusSpace</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Segoe UI", Arial, sans-serif;
+            background: linear-gradient(135deg, #eef2f7, #dfe7f1);
+            color: #172033;
+            min-height: 100vh;
+        }
+
+        nav {
+            min-height: 72px;
+            background: #172033;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            padding: 0 6%;
+        }
+
+        .logo {
+            color: white;
+            text-decoration: none;
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+        }
+
+        .back {
+            color: #e5eaf2;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+
+        .back:hover {
+            color: white;
+        }
+
+        main {
+            width: 100%;
+            max-width: 700px;
+            margin: auto;
+            padding: 55px 25px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.98);
+            border: 1px solid #e0e6ed;
+            border-radius: 18px;
+            padding: 40px;
+            box-shadow: 0 18px 45px rgba(23, 32, 51, 0.12);
+        }
+
+        h1 {
+            color: #172033;
+            font-size: 30px;
+            line-height: 1.2;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #667085;
+            font-size: 15px;
+            line-height: 1.6;
+            margin-bottom: 32px;
+        }
+
+        .form-group {
+            margin-bottom: 22px;
+        }
+
+        label {
+            display: block;
+            color: #344054;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 9px;
+        }
+
+        input,
+        select {
+            width: 100%;
+            min-height: 48px;
+            padding: 13px 14px;
+            border: 1px solid #d0d5dd;
+            border-radius: 9px;
+            color: #172033;
+            font-family: inherit;
+            font-size: 15px;
+            background: #ffffff;
+            transition:
+                border-color 0.2s ease,
+                box-shadow 0.2s ease,
+                background 0.2s ease;
+        }
+
+        input::placeholder {
+            color: #98a2b3;
+        }
+
+        input:hover,
+        select:hover {
+            border-color: #98a2b3;
+        }
+
+        input:focus,
+        select:focus {
+            outline: none;
+            border-color: #172033;
+            box-shadow: 0 0 0 3px rgba(23, 32, 51, 0.12);
+            background: #ffffff;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 14px;
+            margin-top: 32px;
+        }
+
+        button,
+        .cancel {
+            flex: 1;
+            min-height: 48px;
+            padding: 13px 18px;
+            border-radius: 9px;
+            text-align: center;
+            font-family: inherit;
+            font-size: 15px;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition:
+                background 0.2s ease,
+                border-color 0.2s ease,
+                transform 0.2s ease;
+        }
+
+        button {
+            border: 1px solid #172033;
+            background: #172033;
+            color: white;
+        }
+
+        button:hover {
+            background: #26344f;
+            border-color: #26344f;
+            transform: translateY(-1px);
+        }
+
+        .cancel {
+            border: 1px solid #d0d5dd;
+            color: #344054;
+            background: white;
+        }
+
+        .cancel:hover {
+            border-color: #98a2b3;
+            background: #f8fafc;
+            transform: translateY(-1px);
+        }
+
+        @media (max-width: 600px) {
+
+            nav {
+                min-height: 65px;
+                padding: 0 20px;
+            }
+
+            .logo {
+                font-size: 21px;
+            }
+
+            .back {
+                font-size: 13px;
+                text-align: right;
+            }
+
+            main {
+                padding: 30px 15px;
+            }
+
+            .card {
+                padding: 28px 22px;
+                border-radius: 14px;
+            }
+
+            h1 {
+                font-size: 26px;
+            }
+
+            .buttons {
+                flex-direction: column-reverse;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+<nav>
+
+    <a href="/admin" class="logo">
+        CampusSpace
+    </a>
+
+    <a href="/admin" class="back">
+        ← Back to Dashboard
+    </a>
+
+</nav>
+
+
+<main>
+
+    <div class="card">
+
+        <h1>
+            Add a Room
+        </h1>
+
+        <p class="subtitle">
+            Add a new campus space to the booking system.
+        </p>
+
+
+        <form method="POST" action="/add-room">
+
+            <div class="form-group">
+
+                <label for="name">
+                    Room Name
+                </label>
+
+                <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    placeholder="e.g. Seminar Hall D-401"
+                    required>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="room_type">
+                    Room Type
+                </label>
+
+                <select
+                    id="room_type"
+                    name="room_type"
+                    required>
+
+                    <option value="">
+                        Select room type
+                    </option>
+
+                    <option value="Classroom">
+                        Classroom
+                    </option>
+
+                    <option value="Computer Laboratory">
+                        Computer Laboratory
+                    </option>
+
+                    <option value="Meeting Room">
+                        Meeting Room
+                    </option>
+
+                    <option value="Seminar Hall">
+                        Seminar Hall
+                    </option>
+
+                    <option value="Conference Room">
+                        Conference Room
+                    </option>
+
+                    <option value="Other">
+                        Other
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="capacity">
+                    Capacity
+                </label>
+
+                <input
+                    type="number"
+                    id="capacity"
+                    name="capacity"
+                    min="1"
+                    placeholder="e.g. 50"
+                    required>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="floor">
+                    Floor
+                </label>
+
+                <input
+                    type="text"
+                    id="floor"
+                    name="floor"
+                    placeholder="e.g. 4th Floor"
+                    required>
+
+            </div>
+
+
+            <div class="buttons">
+
+                <a href="/admin" class="cancel">
+                    Cancel
+                </a>
+
+                <button type="submit">
+                    Add Room
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</main>
+
+</body>
+
+</html>

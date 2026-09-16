@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Admin Dashboard | CampusSpace</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Segoe UI", Arial, sans-serif;
+            background: #f4f6f8;
+            color: #172033;
+            line-height: 1.5;
+        }
+
+        /* HEADER */
+        nav {
+            min-height: 76px;
+            background: linear-gradient(135deg, #172033, #263653);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 6%;
+            box-shadow: 0 3px 14px rgba(23, 32, 51, 0.18);
+        }
+
+        .logo {
+            color: white;
+            text-decoration: none;
+            font-size: 25px;
+            font-weight: 750;
+            letter-spacing: -0.5px;
+        }
+
+        .admin-label {
+            color: #d9dee7;
+            font-size: 14px;
+        }
+
+        .logout {
+            display: inline-block;
+            margin-left: 20px;
+            color: white;
+            text-decoration: none;
+            border: 1px solid #8d98aa;
+            padding: 9px 17px;
+            border-radius: 7px;
+            font-size: 13px;
+            transition: 0.2s ease;
+        }
+
+        .logout:hover {
+            background: white;
+            color: #172033;
+        }
+
+        /* MAIN */
+        main {
+            max-width: 1250px;
+            margin: auto;
+            padding: 48px 30px 80px;
+        }
+
+        .page-title {
+            margin-bottom: 32px;
+        }
+
+        .page-title p {
+            color: #667085;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1.4px;
+            margin-bottom: 8px;
+        }
+
+        .page-title h1 {
+            font-size: 38px;
+            line-height: 1.2;
+            margin-bottom: 10px;
+            letter-spacing: -0.8px;
+        }
+
+        .page-title span {
+            color: #667085;
+            font-size: 15px;
+        }
+
+        /* STATISTICS */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 22px;
+            margin-bottom: 36px;
+        }
+
+        .stat-card {
+            position: relative;
+            overflow: hidden;
+            background: white;
+            border: 1px solid #e1e6ed;
+            border-radius: 14px;
+            padding: 25px;
+            box-shadow: 0 5px 18px rgba(23, 32, 51, 0.06);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .stat-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: #2563eb;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 9px 24px rgba(23, 32, 51, 0.1);
+        }
+
+        .stat-label {
+            color: #667085;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .stat-number {
+            color: #172033;
+            font-size: 34px;
+            font-weight: 750;
+        }
+
+        /* SECTIONS */
+        .section {
+            background: white;
+            border: 1px solid #e1e6ed;
+            border-radius: 14px;
+            margin-bottom: 30px;
+            overflow: hidden;
+            box-shadow: 0 5px 18px rgba(23, 32, 51, 0.05);
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            padding: 22px 24px;
+            background: #fbfcfe;
+            border-bottom: 1px solid #e8ecf2;
+        }
+
+        .section-header h2 {
+            color: #172033;
+            font-size: 21px;
+            font-weight: 700;
+        }
+
+        .add-button {
+            display: inline-block;
+            background: #172033;
+            color: white;
+            text-decoration: none;
+            padding: 10px 17px;
+            border-radius: 7px;
+            font-size: 13px;
+            font-weight: 650;
+            transition: 0.2s ease;
+        }
+
+        .add-button:hover {
+            background: #34445f;
+            transform: translateY(-1px);
+        }
+
+        /* TABLE */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #f5f7fa;
+            text-align: left;
+            padding: 15px 18px;
+            font-size: 11px;
+            font-weight: 750;
+            letter-spacing: 0.6px;
+            color: #667085;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 16px 18px;
+            border-top: 1px solid #edf0f4;
+            font-size: 14px;
+            color: #344054;
+            vertical-align: middle;
+        }
+
+        tbody tr {
+            transition: background 0.2s ease;
+        }
+
+        tbody tr:hover {
+            background: #f8fafc;
+        }
+
+        .room-name {
+            color: #172033;
+            font-weight: 700;
+        }
+
+        .available {
+            color: #18864b;
+            font-weight: 700;
+        }
+
+        .booked {
+            color: #b42318;
+            font-weight: 700;
+        }
+
+        .action {
+            display: inline-block;
+            color: #2563eb;
+            text-decoration: none;
+            font-weight: 650;
+            margin-right: 14px;
+            font-size: 13px;
+            transition: 0.2s ease;
+        }
+
+        .action:hover {
+            color: #172033;
+            text-decoration: underline;
+        }
+
+        /* BUTTONS INSIDE TABLES */
+        button.action {
+            color: #dc2626;
+        }
+
+        button.action:hover {
+            color: #991b1b;
+        }
+
+        /* FOOTER */
+        footer {
+            background: #172033;
+            color: #aeb6c4;
+            text-align: center;
+            padding: 24px;
+            font-size: 13px;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 900px) {
+            .stats {
+                grid-template-columns: 1fr;
+            }
+
+            .section {
+                overflow-x: auto;
+            }
+
+            table {
+                min-width: 850px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            nav {
+                min-height: 70px;
+                padding: 0 18px;
+            }
+
+            .logo {
+                font-size: 21px;
+            }
+
+            .admin-label {
+                display: none;
+            }
+
+            .logout {
+                margin-left: 0;
+                padding: 8px 12px;
+            }
+
+            main {
+                padding: 35px 15px 55px;
+            }
+
+            .page-title h1 {
+                font-size: 30px;
+            }
+
+            .section-header {
+                padding: 18px;
+            }
+
+            .section-header h2 {
+                font-size: 18px;
+            }
+
+            .stat-card {
+                padding: 22px;
+            }
+        }
+    </style>
+
+</head>
+
+<body>
+
+<nav>
+
+    <a href="/" class="logo">
+        CampusSpace
+    </a>
+
+    <div>
+
+        <span class="admin-label">
+            Administrator
+        </span>
+
+        <a href="/logout" class="logout">
+            Logout
+        </a>
+
+    </div>
+
+</nav>
+
+<main>
+
+    <div class="page-title">
+
+        <p>
+            CAMPUSSPACE ADMINISTRATION
+        </p>
+
+        <h1>
+            Admin Dashboard
+        </h1>
+
+        <span>
+            Manage campus rooms and monitor bookings.
+        </span>
+
+    </div>
+
+    <!-- STATISTICS -->
+
+    <div class="stats">
+
+        <div class="stat-card">
+
+            <div class="stat-label">
+                Total Rooms
+            </div>
+
+            <div class="stat-number">
+                {{ total_rooms }}
+            </div>
+
+        </div>
+
+        <div class="stat-card">
+
+            <div class="stat-label">
+                Today's Bookings
+            </div>
+
+            <div class="stat-number">
+                {{ today_bookings }}
+            </div>
+
+        </div>
+
+        <div class="stat-card">
+
+            <div class="stat-label">
+                Registered Users
+            </div>
+
+            <div class="stat-number">
+                {{ total_users }}
+            </div>
+
+        </div>
+
+    </div>
+
+    </div>
+
+    <!-- FACULTY APPROVAL REQUESTS -->
+
+    <section class="section">
+
+        <div class="section-header">
+
+            <h2>
+                Faculty Approval Requests
+            </h2>
+
+        </div>
+
+        <div style="overflow-x:auto;">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+                        <th>NAME</th>
+                        <th>EMAIL</th>
+                        <th>STATUS</th>
+                        <th>ACTION</th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    {% if faculty_requests %}
+
+                        {% for faculty in faculty_requests %}
+
+                        <tr>
+
+                            <td class="room-name">
+                                {{ faculty["name"] }}
+                            </td>
+
+                            <td>
+                                {{ faculty["email"] }}
+                            </td>
+
+                            <td>
+                                <span style="
+                                    color:#b54708;
+                                    font-weight:600;
+                                ">
+                                    Pending
+                                </span>
+                            </td>
+
+                            <td>
+
+                                <a
+                                    href="/admin/approve-faculty/{{ faculty['id'] }}"
+                                    style="
+                                        display:inline-block;
+                                        background:#18864b;
+                                        color:white;
+                                        padding:7px 12px;
+                                        border-radius:5px;
+                                        text-decoration:none;
+                                        font-size:13px;
+                                        font-weight:600;
+                                        margin-right:6px;
+                                    "
+                                >
+                                    Approve
+                                </a>
+
+                                <a
+                                    href="/admin/reject-faculty/{{ faculty['id'] }}"
+                                    style="
+                                        display:inline-block;
+                                        background:#dc2626;
+                                        color:white;
+                                        padding:7px 12px;
+                                        border-radius:5px;
+                                        text-decoration:none;
+                                        font-size:13px;
+                                        font-weight:600;
+                                    "
+                                >
+                                    Reject
+                                </a>
+
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    {% else %}
+
+                        <tr>
+
+                            <td
+                                colspan="4"
+                                style="
+                                    text-align:center;
+                                    color:#667085;
+                                    padding:30px;
+                                "
+                            >
+                                No pending faculty requests.
+                            </td>
+
+                        </tr>
+
+                    {% endif %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+    <!-- ROOMS -->
+
+    <section class="section">
+
+        <div class="section-header">
+
+            <h2>
+                Campus Rooms
+            </h2>
+
+            <a href="/add-room" class="add-button">
+                + Add Room
+            </a>
+
+            <a href="/admin/invite-admin" class="add-button">
+                Invite New Admin
+            </a>
+
+            <a href="/admin/timetable"
+                style="
+                    display:inline-block;
+                    background:#2563eb;
+                    color:white;
+                    padding:10px 16px;
+                    border-radius:7px;
+                    text-decoration:none;
+                    font-weight:bold;
+                    margin-right:8px;
+                ">
+                Manage Timetable
+            </a>
+
+        </div>
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>ROOM</th>
+                    <th>TYPE</th>
+                    <th>CAPACITY</th>
+                    <th>LOCATION</th>
+                    <th>STATUS</th>
+                    <th>ACTION</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                {% for room in rooms %}
+
+                <tr>
+
+                    <td class="room-name">
+                        {{ room["name"] }}
+                    </td>
+
+                    <td>
+                        {{ room["room_type"] }}
+                    </td>
+
+                    <td>
+                        {{ room["capacity"] }}
+                    </td>
+
+                    <td>
+                        {{ room["floor"] }}
+                    </td>
+
+                    <td class="available">
+                        Available
+                    </td>
+
+                    <td>
+
+                        <a href="/edit-room/{{ room['id'] }}" class="action">
+                            Edit
+                        </a>
+
+                        <form
+                            method="POST"
+                            action="/delete-room/{{ room['id'] }}"
+                            style="display:inline;"
+                            onsubmit="return confirmDelete();">
+
+                            <button
+                                type="submit"
+                                class="action"
+                                style="border:none; background:none; padding:0; cursor:pointer;">
+
+                                Delete
+
+                            </button>
+
+                        </form>
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </section>
+
+    <!-- RECENT BOOKINGS -->
+
+    <section class="section">
+
+        <div class="section-header">
+
+            <h2>
+                Recent Bookings
+            </h2>
+
+        </div>
+
+        <div style="overflow-x:auto;">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>ROOM</th>
+                        <th>CUSTOMER</th>
+                        <th>EMAIL</th>
+                        <th>DATE</th>
+                        <th>TIME</th>
+                        <th>DURATION</th>
+                        <th>PEOPLE</th>
+                        <th>PURPOSE</th>
+                        <th>STATUS</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    {% if recent_bookings %}
+
+                        {% for booking in recent_bookings %}
+
+                        <tr>
+
+                            <td class="room-name">
+                                {{ booking["room_name"] }}
+                            </td>
+
+                            <td>
+                                {{ booking["name"] }}
+                            </td>
+
+                            <td>
+                                {{ booking["email"] }}
+                            </td>
+
+                            <td>
+                                {{ booking["booking_date"] }}
+                            </td>
+
+                            <td>
+                                {{ booking["booking_time"] }}
+                            </td>
+
+                            <td>
+                                {{ booking["duration"] }} hour(s)
+                            </td>
+
+                            <td>
+                                {{ booking["people"] }}
+                            </td>
+
+                            <td>
+                                {{ booking["purpose"] }}
+                            </td>
+
+                            <td>
+
+                                <span class="{{ 'available' if booking['status'] == 'Confirmed' else 'booked' }}">
+                                    {{ booking["status"] }}
+                                </span>
+
+                                {% if booking["status"] == "Confirmed" %}
+
+                                    <form
+                                        method="POST"
+                                        action="/admin/cancel-booking/{{ booking['id'] }}"
+                                        style="margin-top:8px;"
+                                        onsubmit="return confirmCancelBooking();">
+
+                                        <button
+                                            type="submit"
+                                            style="
+                                                border:none;
+                                                background:#dc2626;
+                                                color:white;
+                                                padding:6px 10px;
+                                                border-radius:5px;
+                                                cursor:pointer;
+                                                font-size:12px;
+                                            ">
+
+                                            Cancel Booking
+
+                                        </button>
+
+                                    </form>
+
+                                {% endif %}
+
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    {% else %}
+
+                        <tr>
+
+                            <td
+                                colspan="9"
+                                style="text-align:center; color:#667085; padding:30px;">
+
+                                No bookings yet.
+
+                            </td>
+
+                        </tr>
+
+                    {% endif %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+</main>
+
+<footer>
+
+    CampusSpace · Administration Portal · 2026
+
+</footer>
+
+<script>
+
+function confirmDelete() {
+
+    return confirm(
+        "Delete this room?\n\nThis action cannot be undone."
+    );
+
+}
+
+function confirmCancelBooking() {
+
+    return confirm(
+        "Cancel this booking?\n\nThis action cannot be undone."
+    );
+
+}
+
+</script>
+
+</body>
+
+</html>

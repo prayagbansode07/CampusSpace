@@ -1,0 +1,267 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invite New Admin - CampusSpace</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #eef2f7, #f8fafc);
+            color: #172033;
+            min-height: 100vh;
+        }
+
+        nav {
+            background: #172033;
+            color: white;
+            padding: 18px 7%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .logo {
+            color: white;
+            text-decoration: none;
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .nav-right span {
+            color: #d9dee7;
+            font-size: 14px;
+        }
+
+        .logout {
+            color: white;
+            text-decoration: none;
+            border: 1px solid #667085;
+            padding: 9px 15px;
+            border-radius: 7px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .logout:hover {
+            background: #27334a;
+        }
+
+        main {
+            width: 90%;
+            max-width: 620px;
+            margin: 55px auto;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 18px;
+            color: #172033;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        .card {
+            background: white;
+            border: 1px solid #dfe3e8;
+            border-radius: 16px;
+            padding: 35px;
+            box-shadow: 0 8px 25px rgba(23, 32, 51, 0.08);
+        }
+
+        h1 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #667085;
+            line-height: 1.6;
+            margin-bottom: 28px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        input {
+            width: 100%;
+            padding: 13px 14px;
+            border: 1px solid #cbd2dc;
+            border-radius: 8px;
+            font-size: 15px;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: #172033;
+            box-shadow: 0 0 0 3px rgba(23, 32, 51, 0.10);
+        }
+
+        button {
+            width: 100%;
+            margin-top: 22px;
+            padding: 13px;
+            background: #172033;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #27334a;
+        }
+
+        .note {
+            margin-top: 22px;
+            padding: 14px;
+            background: #f4f6f8;
+            border-left: 4px solid #172033;
+            color: #667085;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 600px) {
+            nav {
+                padding: 16px 5%;
+            }
+
+            .logo {
+                font-size: 21px;
+            }
+
+            .nav-right span {
+                display: none;
+            }
+
+            main {
+                width: 92%;
+                margin: 35px auto;
+            }
+
+            .card {
+                padding: 25px 20px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+        }
+        .flash-container {
+            margin-bottom: 20px;
+        }
+
+        .flash-message {
+            padding: 13px 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 10px;
+            border: 1px solid transparent;
+        }
+
+        .flash-success {
+            background: #eaf7ee;
+            color: #176b35;
+            border-color: #b8e2c4;
+        }
+
+        .flash-error {
+            background: #fff0f0;
+            color: #a12626;
+            border-color: #f0bcbc;
+        }
+
+        .flash-info {
+            background: #eef4ff;
+            color: #214f9b;
+            border-color: #c5d7ff;
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav>
+        <a href="/admin" class="logo">CampusSpace</a>
+
+        <div class="nav-right">
+            <span>Administrator</span>
+            <a href="/logout" class="logout">Logout</a>
+        </div>
+    </nav>
+
+    <main>
+        <a href="/admin" class="back-link">← Back to Admin Dashboard</a>
+
+        <div class="card">
+            <h1>Invite New Admin</h1>
+
+            <p class="subtitle">
+                Enter the email address of the person you want to invite.
+                They will receive an invitation link to create their
+                administrator account.
+            </p>
+            <div class="flash-container">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="flash-message flash-{{ category }}">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+            </div>
+            <form method="POST">
+                <label for="email">New Admin Email</label>
+
+                <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    placeholder="Enter email address"
+                    required
+                >
+
+                <button type="submit">
+                    Send Admin Invitation
+                </button>
+            </form>
+
+            <div class="note">
+                The invitation link will remain valid for 24 hours.
+                Only share administrator access with a trusted person.
+            </div>
+        </div>
+    </main>
+
+</body>
+</html>

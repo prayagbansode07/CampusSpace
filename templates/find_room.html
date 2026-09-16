@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Find a Room - CampusSpace</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Segoe UI", Arial, sans-serif;
+            background: linear-gradient(135deg, #eef2f7, #f8fafc);
+            color: #172033;
+        }
+
+        nav {
+            min-height: 72px;
+            background: #172033;
+            padding: 0 6%;
+            display: flex;
+            align-items: center;
+            gap: 25px;
+            box-shadow: 0 4px 18px rgba(23, 32, 51, 0.12);
+        }
+
+        nav a {
+            color: #d9dee7;
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.2s ease;
+        }
+
+        nav a:hover {
+            color: white;
+        }
+
+        .login {
+            margin-left: auto;
+            border: 1px solid #8993a5;
+            padding: 9px 18px;
+            border-radius: 7px;
+        }
+
+        .login:hover {
+            background: white;
+            color: #172033;
+            border-color: white;
+        }
+
+        main {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 55px 25px 75px;
+        }
+
+        h1 {
+            margin: 0 0 8px;
+            font-size: 36px;
+            letter-spacing: -0.7px;
+        }
+
+        .subtitle {
+            color: #667085;
+            margin: 0 0 30px;
+            font-size: 15px;
+        }
+
+        .search-form {
+            background: white;
+            padding: 30px;
+            border: 1px solid #dfe3e8;
+            border-radius: 14px;
+            box-shadow: 0 12px 30px rgba(23, 32, 51, 0.06);
+            margin-bottom: 35px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+        }
+
+        .field label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #475467;
+            margin-bottom: 8px;
+        }
+
+        .field input,
+        .field select {
+            width: 100%;
+            height: 45px;
+            padding: 0 12px;
+            border: 1px solid #cfd4dc;
+            border-radius: 7px;
+            background: white;
+            color: #172033;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .field input:focus,
+        .field select:focus {
+            border-color: #172033;
+            box-shadow: 0 0 0 3px rgba(23, 32, 51, 0.1);
+        }
+
+        .search-button {
+            margin-top: 22px;
+            background: #172033;
+            color: white;
+            border: none;
+            padding: 12px 22px;
+            border-radius: 7px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: background 0.2s ease, transform 0.2s ease;
+        }
+
+        .search-button:hover {
+            background: #27334a;
+            transform: translateY(-1px);
+        }
+
+        .room-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 22px;
+        }
+
+        .room-card {
+            background: white;
+            padding: 25px;
+            border: 1px solid #dfe3e8;
+            border-radius: 14px;
+            box-shadow: 0 10px 25px rgba(23, 32, 51, 0.06);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .room-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 32px rgba(23, 32, 51, 0.1);
+        }
+
+        .room-card h2 {
+            margin: 0 0 16px;
+            font-size: 21px;
+            color: #172033;
+        }
+
+        .room-info {
+            color: #667085;
+            line-height: 1.9;
+            font-size: 14px;
+        }
+
+        .room-info strong {
+            color: #475467;
+        }
+
+        .book-button {
+            display: inline-block;
+            margin-top: 18px;
+            background: #172033;
+            color: white;
+            padding: 10px 16px;
+            border-radius: 7px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            transition: background 0.2s ease;
+        }
+
+        .book-button:hover {
+            background: #27334a;
+        }
+
+        .empty {
+            background: white;
+            padding: 45px 25px;
+            text-align: center;
+            border: 1px solid #dfe3e8;
+            border-radius: 14px;
+            color: #667085;
+            box-shadow: 0 10px 25px rgba(23, 32, 51, 0.05);
+        }
+
+        footer {
+            background: #172033;
+            color: #aeb6c4;
+            text-align: center;
+            padding: 24px 20px;
+            font-size: 13px;
+        }
+
+        @media (max-width: 800px) {
+
+            .room-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+        }
+
+        @media (max-width: 550px) {
+
+            nav {
+                padding: 15px 20px;
+                gap: 15px;
+                flex-wrap: wrap;
+            }
+
+            .login {
+                margin-left: 0;
+            }
+
+            main {
+                padding: 35px 15px 55px;
+            }
+
+            h1 {
+                font-size: 29px;
+            }
+
+            .search-form {
+                padding: 23px 20px;
+            }
+
+            .form-grid,
+            .room-grid {
+                grid-template-columns: 1fr;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<nav>
+
+    <a href="/">
+        Home
+    </a>
+
+    <a href="/find-room">
+        Rooms
+    </a>
+
+    <a href="/my-bookings">
+        My Bookings
+    </a>
+
+    <a href="#">
+        Help
+    </a>
+
+
+    {% if session.get("user_id") %}
+
+        <span style="color:#d9dee7; font-size:15px;">
+            Welcome, {{ session.get("user_name") }}
+        </span>
+
+        <a href="/logout" class="login">
+            Logout
+        </a>
+
+    {% else %}
+
+        <a href="/login" class="login">
+            Login
+        </a>
+
+    {% endif %}
+
+</nav>
+
+
+
+<main>
+
+
+    <h1>
+        Find a Room
+    </h1>
+
+    <p class="subtitle">
+        Browse available CampusSpace rooms.
+    </p>
+
+
+    <form method="GET"
+          action="/find-room"
+          class="search-form">
+
+
+        <div class="form-grid">
+
+
+            <div class="field">
+
+                <label>
+                    Date
+                </label>
+
+                <input
+                    type="date"
+                    name="date"
+                    required
+                    value="{{ selected_date or '' }}"
+                >
+
+            </div>
+
+
+
+            <div class="field">
+
+                <label>
+                    Start Time
+                </label>
+
+                <input
+                    type="time"
+                    name="time"
+                    required
+                    value="{{ selected_time or '' }}"
+                >
+
+            </div>
+
+
+
+            <div class="field">
+
+                <label>
+                    Duration
+                </label>
+
+                <select
+                    name="duration"
+                    required
+                >
+
+                    <option value="">
+                        Select duration
+                    </option>
+
+                    <option value="1"
+                        {% if selected_duration == "1" %}selected{% endif %}>
+                        1 hour
+                    </option>
+
+                    <option value="2"
+                        {% if selected_duration == "2" %}selected{% endif %}>
+                        2 hours
+                    </option>
+
+                    <option value="3"
+                        {% if selected_duration == "3" %}selected{% endif %}>
+                        3 hours
+                    </option>
+
+                </select>
+
+            </div>
+
+
+        </div>
+
+
+        <button
+            type="submit"
+            class="search-button"
+        >
+
+            Find Available Rooms
+
+        </button>
+
+
+    </form>
+
+
+    {% if rooms %}
+
+        <div class="room-grid">
+
+            {% for room in rooms %}
+
+                <div class="room-card">
+
+                    <h2>
+                        {{ room["name"] }}
+                    </h2>
+
+
+                    <div class="room-info">
+
+                        <div>
+                            <strong>Type:</strong>
+                            {{ room["room_type"] }}
+                        </div>
+
+                        <div>
+                            <strong>Capacity:</strong>
+                            {{ room["capacity"] }}
+                        </div>
+
+                        <div>
+                            <strong>Floor:</strong>
+                            {{ room["floor"] }}
+                        </div>
+
+                    </div>
+
+
+                    <a
+                        href="/book-room?room_id={{ room['id'] }}"
+                        class="book-button"
+                    >
+
+                        Book Room
+
+                    </a>
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+    {% else %}
+
+        <div class="empty">
+
+            No rooms are currently available.
+
+        </div>
+
+    {% endif %}
+
+
+</main>
+
+
+
+<footer>
+
+    CampusSpace · Room Booking System · 2026
+
+</footer>
+
+
+
+</body>
+
+</html>

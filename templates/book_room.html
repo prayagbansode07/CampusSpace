@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Book a Room | CampusSpace</title>
+
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Segoe UI", Arial, sans-serif;
+            background: linear-gradient(135deg, #eef2f7, #f8fafc);
+            color: #172033;
+            font-size: 15px;
+        }
+
+        /* HEADER */
+
+        nav {
+            min-height: 72px;
+            background: #172033;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 6%;
+            box-shadow: 0 4px 18px rgba(23, 32, 51, 0.12);
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: white;
+            text-decoration: none;
+            letter-spacing: -0.4px;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 28px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #d9dee7;
+            font-size: 14px;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+
+        .nav-links a:hover {
+            color: white;
+        }
+
+        .login-btn {
+            border: 1px solid #8993a5;
+            color: white !important;
+            padding: 9px 18px;
+            border-radius: 7px;
+            transition: background 0.2s ease, border-color 0.2s ease;
+        }
+
+        .login-btn:hover {
+            background: white;
+            color: #172033 !important;
+            border-color: white;
+        }
+
+        /* PAGE */
+
+        .page {
+            max-width: 1050px;
+            margin: auto;
+            padding: 55px 30px 80px;
+        }
+
+        .page-title {
+            margin-bottom: 30px;
+        }
+
+        .page-title h1 {
+            font-size: 36px;
+            line-height: 1.2;
+            color: #172033;
+            margin-bottom: 10px;
+            letter-spacing: -0.7px;
+        }
+
+        .page-title p {
+            color: #667085;
+            font-size: 15px;
+        }
+
+        /* BOOKING CONTAINER */
+
+        .booking-container {
+            max-width: 900px;
+            margin: auto;
+        }
+
+        .booking-card {
+            background: white;
+            border: 1px solid #dfe3e8;
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 12px 30px rgba(23, 32, 51, 0.07);
+        }
+
+        /* ROOM SUMMARY */
+
+        .room-summary {
+            background: linear-gradient(135deg, #f8fafc, #eef2f7);
+            border: 1px solid #dfe3e8;
+            border-left: 5px solid #172033;
+            border-radius: 10px;
+            padding: 22px;
+            margin-bottom: 32px;
+        }
+
+        .room-summary h2 {
+            color: #172033;
+            font-size: 23px;
+            margin-bottom: 14px;
+        }
+
+        .room-summary p {
+            color: #475467;
+            font-size: 14px;
+            margin-bottom: 7px;
+        }
+
+        .room-summary p:last-child {
+            margin-bottom: 0;
+        }
+
+        .room-summary strong {
+            color: #172033;
+        }
+
+        /* FORM */
+
+        .form-title {
+            font-size: 22px;
+            margin-bottom: 24px;
+            color: #172033;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 22px;
+        }
+
+        .form-group {
+            margin-bottom: 2px;
+        }
+
+        .form-group.full {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #475467;
+            margin-bottom: 8px;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            min-height: 45px;
+            border: 1px solid #cfd4dc;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            outline: none;
+            background: white;
+            color: #172033;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        input::placeholder,
+        textarea::placeholder {
+            color: #98a2b3;
+        }
+
+        textarea {
+            min-height: 115px;
+            resize: vertical;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            border-color: #172033;
+            box-shadow: 0 0 0 3px rgba(23, 32, 51, 0.1);
+        }
+
+        /* BUTTONS */
+
+        .submit-area {
+            margin-top: 32px;
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        .confirm-button,
+        .cancel-button {
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            text-align: center;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background 0.2s ease, border-color 0.2s ease,
+                        transform 0.2s ease;
+        }
+
+        .confirm-button {
+            border: 1px solid #172033;
+            background: #172033;
+            color: white;
+        }
+
+        .confirm-button:hover {
+            background: #27334a;
+            transform: translateY(-1px);
+        }
+
+        .cancel-button {
+            background: white;
+            color: #172033;
+            border: 1px solid #cfd4dc;
+        }
+
+        .cancel-button:hover {
+            background: #f1f4f8;
+            border-color: #98a2b3;
+        }
+
+        /* FOOTER */
+
+        footer {
+            background: #172033;
+            color: #aeb6c4;
+            text-align: center;
+            padding: 24px 20px;
+        }
+
+        footer p {
+            color: #aeb6c4;
+            font-size: 13px;
+        }
+
+        /* TABLET */
+
+        @media (max-width: 800px) {
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-group.full {
+                grid-column: auto;
+            }
+
+        }
+
+        /* MOBILE */
+
+        @media (max-width: 650px) {
+
+            nav {
+                padding: 15px 20px;
+                flex-wrap: wrap;
+                gap: 15px;
+            }
+
+            .logo {
+                font-size: 22px;
+            }
+
+            .nav-links {
+                gap: 15px;
+            }
+
+            .nav-links a:not(.login-btn) {
+                display: none;
+            }
+
+            .page {
+                padding: 35px 15px 55px;
+            }
+
+            .page-title h1 {
+                font-size: 30px;
+            }
+
+            .booking-card {
+                padding: 22px;
+            }
+
+            .room-summary {
+                padding: 18px;
+            }
+
+            .submit-area {
+                flex-direction: column-reverse;
+            }
+
+            .confirm-button,
+            .cancel-button {
+                width: 100%;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <!-- Navigation -->
+
+    <nav>
+
+        <a href="/" class="logo">
+            CampusSpace
+        </a>
+
+
+        <ul class="nav-links">
+
+            <li>
+                <a href="/">
+                    Home
+                </a>
+            </li>
+
+            <li>
+                <a href="/find-room">
+                    Find a Room
+                </a>
+            </li>
+
+            <li>
+                <a href="#">
+                    Available Rooms
+                </a>
+            </li>
+
+            <li>
+                <a href="#">
+                    My Bookings
+                </a>
+            </li>
+
+            <li>
+                {% if session.get("user_id") %}
+                    <a href="/logout" class="login-btn">
+                        Logout
+                    </a>
+                {% else %}
+                    <a href="/login" class="login-btn">
+                        Login
+                    </a>
+                {% endif %}
+            </li>
+
+        </ul>
+
+    </nav>
+
+
+
+    <!-- Booking Page -->
+
+    <main class="page">
+
+        <div class="booking-container">
+
+
+            <div class="page-title">
+
+                <h1>
+                    Book a Room
+                </h1>
+
+                <p>
+                    Enter your booking details to reserve this campus space.
+                </p>
+
+            </div>
+
+
+
+            <div class="booking-card">
+
+
+                <!-- Selected Room -->
+
+                <div class="room-summary">
+
+                    <h2>
+                        {{ room["name"] }}
+                    </h2>
+
+                    <p>
+                        <strong>Type:</strong>
+                        {{ room["room_type"] }}
+                    </p>
+
+                    <p>
+                        <strong>Capacity:</strong>
+                        {{ room["capacity"] }} people
+                    </p>
+
+                    <p>
+                        <strong>Location:</strong>
+                        {{ room["floor"] }}
+                    </p>
+
+                </div>
+
+
+
+                <h2 class="form-title">
+                    Booking Details
+                </h2>
+
+
+
+                <form method="POST"
+                      action="/book-room?room_id={{ room['id'] }}">
+
+
+                    <div class="form-grid">
+
+
+                        <!-- Name -->
+
+                        <div class="form-group">
+
+                            <label for="name">
+                                Your Name
+                            </label>
+
+                            <input
+                                type="text"
+                                id="name"
+                                name="name"
+                                placeholder="Enter your full name"
+                                required>
+
+                        </div>
+
+
+
+                        <!-- Email -->
+
+                        <div class="form-group">
+
+                            <label for="email">
+                                Email Address
+                            </label>
+
+                            <input
+                                type="email"
+                                id="email"
+                                name="email"
+                                placeholder="Enter your email"
+                                required>
+
+                        </div>
+
+
+
+                        <!-- Date -->
+
+                        <div class="form-group">
+
+                            <label for="date">
+                                Booking Date
+                            </label>
+
+                            <input
+                                type="date"
+                                id="date"
+                                name="date"
+                                required>
+
+                        </div>
+
+
+
+                        <!-- Time -->
+
+                        <div class="form-group">
+
+                            <label for="time">
+                                Booking Time
+                            </label>
+
+                            <select
+                                id="time"
+                                name="time"
+                                required>
+
+                                <option value="">
+                                    Select time
+                                </option>
+
+                                <option>
+                                    09:00 AM
+                                </option>
+
+                                <option>
+                                    10:00 AM
+                                </option>
+
+                                <option>
+                                    11:00 AM
+                                </option>
+
+                                <option>
+                                    12:00 PM
+                                </option>
+
+                                <option>
+                                    01:00 PM
+                                </option>
+
+                                <option>
+                                    02:00 PM
+                                </option>
+
+                                <option>
+                                    03:00 PM
+                                </option>
+
+                                <option>
+                                    04:00 PM
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+
+                        <!-- Duration -->
+
+                        <div class="form-group">
+
+                            <label for="duration">
+                                Duration
+                            </label>
+
+                            <select
+                                id="duration"
+                                name="duration"
+                                required>
+
+                                <option value="">
+                                    Select duration
+                                </option>
+
+                                <option>
+                                    1 Hour
+                                </option>
+
+                                <option>
+                                    2 Hours
+                                </option>
+
+                                <option>
+                                    3 Hours
+                                </option>
+
+                                <option>
+                                    4 Hours
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+
+                        <!-- Number of People -->
+
+                        <div class="form-group">
+
+                            <label for="people">
+                                Number of People
+                            </label>
+
+                            <input
+                                type="number"
+                                id="people"
+                                name="people"
+                                min="1"
+                                max="40"
+                                placeholder="e.g. 20"
+                                required>
+
+                        </div>
+
+
+
+                        <!-- Purpose -->
+
+                        <div class="form-group full">
+
+                            <label for="purpose">
+                                Purpose of Booking
+                            </label>
+
+                            <textarea
+                                id="purpose"
+                                name="purpose"
+                                placeholder="What will the room be used for?"
+                                required></textarea>
+
+                        </div>
+
+
+                    </div>
+
+
+
+                    <div class="submit-area">
+
+                        <a
+                            href="/find-room"
+                            class="cancel-button">
+
+                            Cancel
+
+                        </a>
+
+
+                        <button
+                            type="submit"
+                            class="confirm-button">
+
+                            Confirm Booking
+
+                        </button>
+
+                    </div>
+
+
+                </form>
+
+
+            </div>
+
+
+        </div>
+
+    </main>
+
+
+
+    <!-- Footer -->
+
+    <footer>
+
+        <p>
+            © 2026 CampusSpace. Smart Campus Room & Hall Booking System.
+        </p>
+
+    </footer>
+
+
+</body>
+
+</html>

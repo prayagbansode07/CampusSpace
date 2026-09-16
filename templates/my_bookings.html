@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>My Bookings | CampusSpace</title>
+
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Segoe UI", Arial, sans-serif;
+            background: linear-gradient(135deg, #eef2f7, #f8fafc);
+            color: #172033;
+            font-size: 15px;
+        }
+
+        /* HEADER */
+
+        nav {
+            min-height: 72px;
+            background: #172033;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 6%;
+            box-shadow: 0 4px 18px rgba(23, 32, 51, 0.12);
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: white;
+            text-decoration: none;
+            letter-spacing: -0.4px;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 28px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #d9dee7;
+            font-size: 14px;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+
+        .nav-links a:hover {
+            color: white;
+        }
+
+        .login-btn {
+            border: 1px solid #8993a5;
+            color: white !important;
+            padding: 9px 18px;
+            border-radius: 7px;
+            transition: background 0.2s ease, border-color 0.2s ease;
+        }
+
+        .login-btn:hover {
+            background: white;
+            color: #172033 !important;
+            border-color: white;
+        }
+
+        /* PAGE */
+
+        .page {
+            max-width: 1160px;
+            margin: auto;
+            padding: 55px 30px 80px;
+            min-height: calc(100vh - 72px);
+        }
+
+        .page-title {
+            margin-bottom: 30px;
+        }
+
+        .page-title h1 {
+            font-size: 36px;
+            line-height: 1.2;
+            color: #172033;
+            margin-bottom: 10px;
+            letter-spacing: -0.7px;
+        }
+
+        .page-title p {
+            color: #667085;
+            font-size: 15px;
+        }
+
+        /* ACCOUNT INFORMATION */
+
+        .account-info {
+            background: white;
+            border: 1px solid #dfe3e8;
+            border-radius: 14px;
+            padding: 22px 25px;
+            margin-bottom: 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 10px 25px rgba(23, 32, 51, 0.05);
+        }
+
+        .account-label {
+            display: block;
+            color: #667085;
+            font-size: 13px;
+            margin-bottom: 5px;
+        }
+
+        .account-info strong {
+            display: block;
+            font-size: 18px;
+            color: #172033;
+        }
+
+        .account-email {
+            display: block;
+            color: #667085;
+            font-size: 14px;
+            margin-top: 4px;
+        }
+
+        .new-booking-button {
+            background: #172033;
+            color: white;
+            text-decoration: none;
+            padding: 11px 19px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            transition: background 0.2s ease, transform 0.2s ease;
+        }
+
+        .new-booking-button:hover {
+            background: #27334a;
+            transform: translateY(-1px);
+        }
+
+        /* BOOKINGS */
+
+        .bookings-container {
+            width: 100%;
+        }
+
+        .booking-card {
+            background: white;
+            border-radius: 14px;
+            padding: 26px;
+            margin-bottom: 20px;
+            border: 1px solid #dfe3e8;
+            box-shadow: 0 10px 25px rgba(23, 32, 51, 0.06);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .booking-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 14px 30px rgba(23, 32, 51, 0.09);
+        }
+
+        .booking-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 18px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #eaecf0;
+            gap: 15px;
+        }
+
+        .booking-top h2 {
+            font-size: 21px;
+            color: #172033;
+        }
+
+        .status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .status.confirmed {
+            background: #edf7f1;
+            color: #18864b;
+            border: 1px solid #b7dfc6;
+        }
+
+        .status.cancelled {
+            background: #fef3f2;
+            color: #b42318;
+            border: 1px solid #fecdca;
+        }
+
+        .booking-details {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+        }
+
+        .detail {
+            background: #f8fafc;
+            border: 1px solid #eaecf0;
+            padding: 16px;
+            border-radius: 9px;
+        }
+
+        .detail-label {
+            display: block;
+            color: #667085;
+            font-size: 12px;
+            margin-bottom: 7px;
+        }
+
+        .detail-value {
+            font-weight: 600;
+            font-size: 15px;
+            color: #172033;
+            overflow-wrap: anywhere;
+        }
+
+        .purpose {
+            margin-top: 20px;
+            padding-top: 17px;
+            border-top: 1px solid #eaecf0;
+            color: #475467;
+            font-size: 14px;
+            line-height: 1.7;
+        }
+
+        .purpose strong {
+            color: #172033;
+        }
+
+        /* EMPTY STATE */
+
+        .empty {
+            text-align: center;
+            background: white;
+            padding: 60px 20px;
+            border: 1px solid #dfe3e8;
+            border-radius: 14px;
+            box-shadow: 0 10px 25px rgba(23, 32, 51, 0.05);
+        }
+
+        .empty h2 {
+            font-size: 22px;
+            margin-bottom: 10px;
+        }
+
+        .empty p {
+            color: #667085;
+            margin-bottom: 24px;
+            font-size: 14px;
+        }
+
+        .find-button {
+            display: inline-block;
+            background: #172033;
+            color: white;
+            text-decoration: none;
+            padding: 11px 22px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            transition: background 0.2s ease;
+        }
+
+        .find-button:hover {
+            background: #27334a;
+        }
+
+        .cancel-button {
+            display: inline-block;
+            margin-top: 20px;
+            background: #dc2626;
+            color: white;
+            text-decoration: none;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            transition: background 0.2s ease, transform 0.2s ease;
+        }
+
+        .cancel-button:hover {
+            background: #b91c1c;
+            transform: translateY(-1px);
+        }
+
+        /* FOOTER */
+
+        footer {
+            background: #172033;
+            color: #aeb6c4;
+            text-align: center;
+            padding: 24px 20px;
+        }
+
+        footer p {
+            color: #aeb6c4;
+            font-size: 13px;
+        }
+
+        /* TABLET */
+
+        @media (max-width: 800px) {
+
+            .booking-details {
+                grid-template-columns: 1fr 1fr;
+            }
+
+        }
+
+        /* MOBILE */
+
+        @media (max-width: 650px) {
+
+            nav {
+                padding: 15px 20px;
+                flex-wrap: wrap;
+                gap: 15px;
+            }
+
+            .logo {
+                font-size: 22px;
+            }
+
+            .nav-links {
+                gap: 15px;
+            }
+
+            .nav-links a:not(.login-btn) {
+                display: none;
+            }
+
+            .page {
+                padding: 35px 15px 55px;
+            }
+
+            .page-title h1 {
+                font-size: 30px;
+            }
+
+            .account-info {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 18px;
+                padding: 22px;
+            }
+
+            .new-booking-button {
+                width: 100%;
+                text-align: center;
+            }
+
+            .booking-card {
+                padding: 22px;
+            }
+
+            .booking-details {
+                grid-template-columns: 1fr;
+            }
+
+            .booking-top {
+                align-items: flex-start;
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .status {
+                align-self: flex-start;
+            }
+
+            .cancel-button {
+                width: 100%;
+                text-align: center;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <!-- Navigation -->
+
+    <nav>
+
+        <a href="/" class="logo">
+            CampusSpace
+        </a>
+
+
+        <ul class="nav-links">
+
+            <li>
+                <a href="/">
+                    Home
+                </a>
+            </li>
+
+            <li>
+                <a href="/find-room">
+                    Find a Room
+                </a>
+            </li>
+
+            <li>
+                <a href="#">
+                    Available Rooms
+                </a>
+            </li>
+
+            <li>
+                <a href="/my-bookings">
+                    My Bookings
+                </a>
+            </li>
+
+            <li>
+                {% if session.get("user_id") %}
+                    <a href="/logout" class="login-btn">
+                        Logout
+                    </a>
+                {% else %}
+                    <a href="/login" class="login-btn">
+                        Login
+                    </a>
+                {% endif %}
+            </li>
+
+        </ul>
+
+    </nav>
+
+
+
+    <!-- Main -->
+
+    <main class="page">
+
+
+        <div class="page-title">
+
+            <h1>
+                My Bookings
+            </h1>
+
+            <p>
+                View your campus room reservations.
+            </p>
+
+        </div>
+
+
+
+        <!-- Account Information -->
+
+        <div class="account-info">
+
+            <div>
+
+                <span class="account-label">
+                    Signed in as
+                </span>
+
+                <strong>
+                    {{ session.get("user_name") }}
+                </strong>
+
+                <span class="account-email">
+                    {{ session.get("user_email") }}
+                </span>
+
+            </div>
+
+
+            <a href="/find-room" class="new-booking-button">
+                + New Booking
+            </a>
+
+        </div>
+
+
+
+        <!-- Booking Results -->
+
+        <div class="bookings-container">
+
+
+            {% if bookings %}
+
+                {% for booking in bookings %}
+
+                    <div class="booking-card">
+
+
+                        <div class="booking-top">
+
+                            <h2>
+                                {{ booking["room_name"] }}
+                            </h2>
+
+                            <span class="status {{ booking['status']|lower }}">
+                                {{ booking["status"] }}
+                            </span>
+
+                        </div>
+
+
+
+                        <div class="booking-details">
+
+
+                            <div class="detail">
+
+                                <span class="detail-label">
+                                    Date
+                                </span>
+
+                                <span class="detail-value">
+                                    {{ booking["booking_date"] }}
+                                </span>
+
+                            </div>
+
+
+
+                            <div class="detail">
+
+                                <span class="detail-label">
+                                    Time
+                                </span>
+
+                                <span class="detail-value">
+                                    {{ booking["booking_time"] }}
+                                </span>
+
+                            </div>
+
+
+
+                            <div class="detail">
+
+                                <span class="detail-label">
+                                    Duration
+                                </span>
+
+                                <span class="detail-value">
+                                    {{ booking["duration"] }} hour(s)
+                                </span>
+
+                            </div>
+
+
+
+                            <div class="detail">
+
+                                <span class="detail-label">
+                                    People
+                                </span>
+
+                                <span class="detail-value">
+                                    {{ booking["people"] }}
+                                </span>
+
+                            </div>
+
+
+                        </div>
+
+
+
+                        <p class="purpose">
+
+                            <strong>
+                                Purpose:
+                            </strong>
+
+                            {{ booking["purpose"] }}
+
+                        </p>
+
+
+
+                        {% if booking["status"] == "Confirmed" %}
+
+                            <a
+                                href="/cancel-booking/{{ booking['id'] }}"
+                                class="cancel-button"
+                                onclick="return confirm('Are you sure you want to cancel this booking?');"
+                            >
+
+                                Cancel Booking
+
+                            </a>
+
+                        {% endif %}
+
+
+                    </div>
+
+                {% endfor %}
+
+
+            {% else %}
+
+                <div class="empty">
+
+                    <h2>
+                        No bookings yet
+                    </h2>
+
+                    <p>
+                        You don't have any room bookings yet.
+                    </p>
+
+                    <a
+                        href="/find-room"
+                        class="find-button"
+                    >
+
+                        Find a Room
+
+                    </a>
+
+                </div>
+
+            {% endif %}
+
+
+        </div>
+
+
+    </main>
+
+
+
+    <!-- Footer -->
+
+    <footer>
+
+        <p>
+            © 2026 CampusSpace. Smart Campus Room & Hall Booking System.
+        </p>
+
+    </footer>
+
+
+</body>
+
+</html>
