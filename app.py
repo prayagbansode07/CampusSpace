@@ -213,6 +213,13 @@ def init_db():
             ALTER TABLE bookings
             ADD COLUMN status TEXT DEFAULT 'confirmed'
         """)
+
+    if "booker_role" not in booking_columns:
+        connection.execute("""
+            ALTER TABLE bookings
+            ADD COLUMN booker_role TEXT DEFAULT 'student'
+        """)
+
     connection.commit()
     connection.close()
 
@@ -328,7 +335,7 @@ def find_room():
                 FROM bookings
                 WHERE room_id = ?
                 AND booking_date = ?
-                AND status != 'Cancelled'
+                AND LOWER(status) != 'cancelled'
             """, (
                 room["id"],
                 selected_date
@@ -808,7 +815,7 @@ def book_room():
             FROM bookings
             WHERE room_id = ?
             AND booking_date = ?
-            AND status = 'Confirmed'
+            AND LOWER(status) = 'confirmed'
         """, (room_id, booking_date)).fetchall()
         # Convert requested time into datetime
         requested_start = datetime.strptime(
