@@ -606,7 +606,7 @@
 
 
 
-                        {% if booking["status"] == "Confirmed" %}
+                        {% if booking["status"]|lower == "confirmed" %}
 
                             <a
                                 href="/cancel-booking/{{ booking['id'] }}"

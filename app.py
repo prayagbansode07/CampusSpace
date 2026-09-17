@@ -388,8 +388,8 @@ def my_bookings():
         FROM bookings
         JOIN rooms
             ON bookings.room_id = rooms.id
-        WHERE bookings.email = ?
-        ORDER BY bookings.booking_date DESC
+        WHERE LOWER(TRIM(bookings.email)) = LOWER(TRIM(?))
+        ORDER BY bookings.booking_date DESC, bookings.booking_time DESC
     """, (session["user_email"],)).fetchall()
 
     connection.close()
