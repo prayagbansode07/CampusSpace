@@ -201,7 +201,8 @@ def init_db():
             ALTER TABLE users
             ADD COLUMN faculty_status TEXT DEFAULT 'none'
         """)
-        booking_columns = [
+
+    booking_columns = [
         row[1]
         for row in connection.execute(
             "PRAGMA table_info(bookings)"
