@@ -799,6 +799,9 @@ def book_room():
 
         connection.close()
 
+        print("BOOKING DEBUG - session user_id:", user_id)
+        print("BOOKING DEBUG - logged_in_user:", logged_in_user)
+
         if logged_in_user is None:
             flash("User account not found.", "error")
             return redirect(url_for("home"))
