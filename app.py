@@ -27,26 +27,33 @@ def get_db():
     connection.row_factory = sqlite3.Row
     return connection
 
-def send_email_via_resend(receiver_email, subject, body):
-    api_key = os.environ.get("RESEND_API_KEY")
+def send_email_via_brevo(receiver_email, subject, body):
+    api_key = os.environ.get("BREVO_API_KEY")
 
     if not api_key:
-        raise Exception("RESEND_API_KEY is not configured.")
+        raise Exception("BREVO_API_KEY is not configured.")
 
     email_data = {
-        "from": "CampusSpace <onboarding@resend.dev>",
-        "to": [receiver_email],
+        "sender": {
+            "name": "CampusSpace",
+            "email": "campusspace.college@gmail.com"
+        },
+        "to": [
+            {
+                "email": receiver_email
+            }
+        ],
         "subject": subject,
-        "text": body
+        "textContent": body
     }
 
     request = Request(
-        "https://api.resend.com/emails",
+        "https://api.brevo.com/v3/smtp/email",
         data=json.dumps(email_data).encode("utf-8"),
         headers={
-            "Authorization": f"Bearer {api_key}",
-            "Content-Type": "application/json",
-            "User-Agent": "CampusSpace/1.0"
+            "accept": "application/json",
+            "api-key": api_key,
+            "Content-Type": "application/json"
         },
         method="POST"
     )
@@ -54,10 +61,11 @@ def send_email_via_resend(receiver_email, subject, body):
     try:
         with urlopen(request, timeout=20) as response:
             response.read()
+            print("BREVO: Email sent successfully")
 
     except HTTPError as error:
-        error_body = error.read().decode("utf-8")
-        print("RESEND ERROR:", error_body)
+        error_body = error.read().decode("utf-8", errors="replace")
+        print("BREVO ERROR:", error_body)
         raise
 
 def send_otp_email(receiver_email, otp):
@@ -79,7 +87,7 @@ Regards,
 CampusSpace
 """
 
-    send_email_via_resend(receiver_email, subject, body)
+    send_email_via_brevo(receiver_email, subject, body)
 
 def send_admin_invitation_email(receiver_email, token):
 
@@ -107,7 +115,7 @@ Regards,
 CampusSpace
 """
 
-    send_email_via_resend(receiver_email, subject, body)
+    send_email_via_brevo(receiver_email, subject, body)
 
 def init_db():
     connection = get_db()
