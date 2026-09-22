@@ -787,7 +787,11 @@ def book_room():
 
     if request.method == "POST":
 
+        print("BOOKING DEBUG - cwd:", os.getcwd())
+        print("BOOKING DEBUG - database:", os.path.abspath(DATABASE))
+
         user_id = session["user_id"]
+        
 
         connection = get_db()
 
