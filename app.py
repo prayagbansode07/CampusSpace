@@ -787,9 +787,6 @@ def book_room():
 
     if request.method == "POST":
 
-        print("BOOKING DEBUG - cwd:", os.getcwd())
-        print("BOOKING DEBUG - database:", os.path.abspath(DATABASE))
-
         user_id = session["user_id"]
         
 
@@ -803,8 +800,7 @@ def book_room():
 
         connection.close()
 
-        print("BOOKING DEBUG - session user_id:", user_id)
-        print("BOOKING DEBUG - logged_in_user:", logged_in_user)
+        
 
         if logged_in_user is None:
             flash("User account not found.", "error")
