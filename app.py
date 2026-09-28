@@ -951,55 +951,14 @@ def book_room():
         connection.commit()
         connection.close()
 
-
-        return f"""
-        <div style="
-            font-family: Arial;
-            text-align: center;
-            margin-top: 100px;
-        ">
-
-            <h1 style="color: #16a34a;">
-                Booking Confirmed!
-            </h1>
-
-            <p>
-                Thank you, <strong>{name}</strong>.
-            </p>
-
-            <p>
-                <strong>Room:</strong> {room["name"]}
-            </p>
-
-            <p>
-                <strong>Date:</strong> {booking_date}
-            </p>
-
-            <p>
-                <strong>Time:</strong> {booking_time}
-            </p>
-
-            <p>
-                <strong>Duration:</strong> {duration} hour(s)
-            </p>
-
-            <br>
-
-            <a href="/"
-               style="
-                    display: inline-block;
-                    background: #2563eb;
-                    color: white;
-                    padding: 12px 22px;
-                    border-radius: 8px;
-                    text-decoration: none;
-               ">
-                Back to CampusSpace
-            </a>
-
-        </div>
-        """
-
+        return render_template(
+            "booking_confirmation.html",
+            name=name,
+            room=room,
+            booking_date=booking_date,
+            booking_time=booking_time,
+            duration=duration
+        )
 
     return render_template("book_room.html", room=room)
 
