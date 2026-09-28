@@ -2,18 +2,26 @@
 <html lang="en">
 
 <head>
-
     <meta charset="UTF-8">
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <meta name="description"
+          content="CampusSpace - Campus room and facility booking system">
+
     <title>CampusSpace | Campus Room Booking</title>
 
+    <!-- Inter Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+          rel="stylesheet">
+
     <style>
+
+        /* =========================================================
+           GLOBAL
+        ========================================================= */
 
         * {
             margin: 0;
@@ -24,48 +32,91 @@
         :root {
             --navy: #101828;
             --navy-light: #1d2939;
+            --navy-soft: #344054;
+
             --text: #101828;
+            --text-secondary: #344054;
             --muted: #667085;
+
             --border: #e4e7ec;
+            --border-dark: #d0d5dd;
+
             --surface: #ffffff;
             --surface-soft: #f8fafc;
+
             --accent: #2563eb;
             --accent-dark: #1d4ed8;
+            --accent-soft: #eff4ff;
+
             --green: #15803d;
+            --green-bright: #12b76a;
             --green-soft: #ecfdf3;
+
             --red: #b42318;
             --red-soft: #fef3f2;
+
+            --shadow-sm: 0 4px 12px rgba(16, 24, 40, 0.05);
+            --shadow-md: 0 12px 30px rgba(16, 24, 40, 0.07);
+            --shadow-lg: 0 20px 45px rgba(16, 24, 40, 0.12);
+        }
+
+        html {
+            scroll-behavior: smooth;
         }
 
         body {
             font-family: "Inter", sans-serif;
-             background:
-                radial-gradient(circle at 10% 0%, rgba(37, 99, 235, 0.08), transparent 28%),
-                linear-gradient(135deg, #f8fafc, #eef2f7);
+            background:
+                radial-gradient(
+                    circle at 10% 0%,
+                    rgba(37, 99, 235, 0.07),
+                    transparent 28%
+                ),
+                linear-gradient(
+                    135deg,
+                    #f8fafc 0%,
+                    #eef2f7 100%
+                );
             color: var(--text);
             font-size: 15px;
             line-height: 1.5;
             min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
         }
 
         a {
             color: inherit;
         }
 
-        /* HEADER */
+        button,
+        input,
+        select {
+            font-family: inherit;
+        }
+
+
+        /* =========================================================
+           HEADER
+        ========================================================= */
 
         header {
             min-height: 76px;
             padding: 0 6%;
+
             background: rgba(16, 24, 40, 0.97);
             color: white;
+
             display: flex;
             align-items: center;
             justify-content: space-between;
+
             gap: 25px;
+
             position: sticky;
             top: 0;
             z-index: 100;
+
             box-shadow: 0 8px 30px rgba(16, 24, 40, 0.12);
             backdrop-filter: blur(12px);
         }
@@ -74,6 +125,7 @@
             display: flex;
             align-items: center;
             gap: 12px;
+
             text-decoration: none;
             flex-shrink: 0;
         }
@@ -81,21 +133,36 @@
         .brand-mark {
             width: 40px;
             height: 40px;
+
             background: white;
             color: var(--navy);
+
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: 800;
+
             border-radius: 10px;
+
             font-size: 13px;
+            font-weight: 800;
+            letter-spacing: -0.3px;
+
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.12);
+
+            transition:
+                transform 0.2s ease,
+                box-shadow 0.2s ease;
+        }
+
+        .brand:hover .brand-mark {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.16);
         }
 
         .brand-name {
             font-size: 23px;
-            font-weight: 750;
-            letter-spacing: -0.3px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
         }
 
         nav {
@@ -107,23 +174,36 @@
         nav a {
             color: #d0d5dd;
             text-decoration: none;
+
             font-size: 14px;
-            font-weight: 500;
-            transition: color 0.2s ease;
+            font-weight: 600;
+
+            transition:
+                color 0.2s ease,
+                opacity 0.2s ease;
         }
 
         nav a:hover {
             color: white;
         }
 
+        nav span {
+            font-weight: 500;
+        }
+
         .login {
             border: 1px solid #667085;
+
             padding: 9px 17px;
+
             border-radius: 8px;
+
             color: white;
+
             transition:
                 background 0.2s ease,
                 border-color 0.2s ease,
+                color 0.2s ease,
                 transform 0.2s ease;
         }
 
@@ -131,56 +211,91 @@
             background: white;
             border-color: white;
             color: var(--navy);
+
             transform: translateY(-1px);
         }
 
-        /* MAIN */
+
+        /* =========================================================
+           MAIN
+        ========================================================= */
 
         main {
+            width: 100%;
             max-width: 1240px;
-            margin: auto;
+
+            margin: 0 auto;
+
             padding: 64px 30px 85px;
         }
 
-        /* HERO */
+
+        /* =========================================================
+           HERO
+        ========================================================= */
 
         .welcome {
             position: relative;
             overflow: hidden;
+
             background:
-                linear-gradient(135deg, #101828 0%, #18263d 65%, #223554 100%);
+                linear-gradient(
+                    135deg,
+                    #101828 0%,
+                    #18263d 60%,
+                    #223554 100%
+                );
+
             color: white;
+
             border-radius: 22px;
-            padding: 55px 55px;
+
+            padding: 58px 55px;
             margin-bottom: 30px;
-            box-shadow: 0 20px 45px rgba(16, 24, 40, 0.16);
+
+            box-shadow: var(--shadow-lg);
         }
 
         .welcome::after {
             content: "";
+
             position: absolute;
+
             width: 300px;
             height: 300px;
+
             border-radius: 50%;
+
             border: 1px solid rgba(255, 255, 255, 0.08);
+
             right: -90px;
             top: -100px;
+
+            pointer-events: none;
         }
 
         .welcome::before {
             content: "";
+
             position: absolute;
+
             width: 180px;
             height: 180px;
+
             border-radius: 50%;
+
             border: 1px solid rgba(255, 255, 255, 0.06);
+
             right: 80px;
             bottom: -120px;
+
+            pointer-events: none;
         }
 
         .welcome-content {
             position: relative;
             z-index: 2;
+
             max-width: 760px;
         }
 
@@ -188,48 +303,76 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
+
             padding: 7px 12px;
+
             border-radius: 999px;
-            background: rgba(255, 255, 255, 0.1);
+
+            background: rgba(255, 255, 255, 0.10);
             border: 1px solid rgba(255, 255, 255, 0.14);
+
             color: #e4e7ec;
+
             font-size: 12px;
             font-weight: 600;
+
             margin-bottom: 18px;
         }
 
         .welcome-badge-dot {
             width: 7px;
             height: 7px;
+
             background: #32d583;
+
             border-radius: 50%;
-            box-shadow: 0 0 0 4px rgba(50, 213, 131, 0.12);
+
+            box-shadow:
+                0 0 0 4px rgba(50, 213, 131, 0.12);
         }
 
         .welcome h1 {
             font-size: 43px;
-            line-height: 800;
-            font-weight: 750;
+
+            /* FIXED */
+            line-height: 1.15;
+
+            font-weight: 800;
+
             letter-spacing: -1.2px;
+
             margin-bottom: 14px;
         }
 
         .welcome-description {
             color: #cdd5df;
+
             font-size: 16px;
+
             max-width: 650px;
+
             line-height: 1.7;
+
+            font-weight: 400;
         }
 
-        /* SEARCH PANEL */
+
+        /* =========================================================
+           SEARCH PANEL
+        ========================================================= */
 
         .search-panel {
             background: var(--surface);
+
             border: 1px solid var(--border);
+
             border-radius: 18px;
+
             padding: 30px;
+
             margin-bottom: 48px;
-            box-shadow: 0 15px 35px rgba(16, 24, 40, 0.07);
+
+            box-shadow: var(--shadow-md);
         }
 
         .search-header {
@@ -238,28 +381,47 @@
 
         .search-panel h2 {
             font-size: 23px;
+
             color: var(--text);
+
+            font-weight: 700;
+
             margin-bottom: 5px;
+
             letter-spacing: -0.3px;
         }
 
         .search-panel > .search-header p {
             color: var(--muted);
+
             font-size: 14px;
+            font-weight: 400;
         }
 
         .search-fields {
             display: grid;
-            grid-template-columns: 1.35fr 1fr 1fr 1fr auto;
+
+            grid-template-columns:
+                1.35fr
+                1fr
+                1fr
+                1fr
+                auto;
+
             gap: 13px;
+
             align-items: end;
         }
 
         .field label {
             display: block;
+
             font-size: 13px;
-            font-weight: 650;
-            color: #344054;
+
+            font-weight: 700;
+
+            color: var(--text-secondary);
+
             margin-bottom: 8px;
         }
 
@@ -267,13 +429,22 @@
         .field select {
             width: 100%;
             height: 46px;
-            border: 1px solid #d0d5dd;
+
+            border: 1px solid var(--border-dark);
+
             border-radius: 9px;
+
             background: white;
+
             padding: 0 12px;
+
             font-size: 14px;
+            font-weight: 400;
+
             color: var(--text);
+
             outline: none;
+
             transition:
                 border-color 0.2s ease,
                 box-shadow 0.2s ease;
@@ -286,99 +457,152 @@
         .field input:focus,
         .field select:focus {
             border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+
+            box-shadow:
+                0 0 0 3px rgba(37, 99, 235, 0.10);
         }
 
         .search-button {
             height: 46px;
+
             border: none;
+
             border-radius: 9px;
+
             background: var(--accent);
             color: white;
+
             padding: 0 25px;
+
             cursor: pointer;
-            font-weight: 650;
+
             font-size: 14px;
+            font-weight: 700;
+
             transition:
                 background 0.2s ease,
                 transform 0.2s ease,
                 box-shadow 0.2s ease;
-            box-shadow: 0 5px 12px rgba(37, 99, 235, 0.18);
+
+            box-shadow:
+                0 5px 12px rgba(37, 99, 235, 0.18);
         }
 
         .search-button:hover {
             background: var(--accent-dark);
+
             transform: translateY(-1px);
-            box-shadow: 0 8px 18px rgba(37, 99, 235, 0.22);
+
+            box-shadow:
+                0 8px 18px rgba(37, 99, 235, 0.22);
         }
 
-        /* SECTION HEADING */
+
+        /* =========================================================
+           SECTION HEADING
+        ========================================================= */
 
         .section-heading {
             display: flex;
+
             justify-content: space-between;
             align-items: center;
+
             margin-bottom: 17px;
         }
 
         .section-title-wrap h2 {
             font-size: 25px;
+
             color: var(--text);
+
+            font-weight: 700;
+
             letter-spacing: -0.4px;
         }
 
         .section-title-wrap p {
             color: var(--muted);
+
             font-size: 13px;
+
+            font-weight: 400;
+
             margin-top: 3px;
         }
 
-        .section-heading a {
+        .section-heading > a {
             color: var(--accent);
+
             text-decoration: none;
+
             font-size: 14px;
-            font-weight: 650;
+            font-weight: 700;
+
             transition: color 0.2s ease;
         }
 
-        .section-heading a:hover {
+        .section-heading > a:hover {
             color: var(--accent-dark);
         }
 
-        /* ROOM TABLE */
+
+        /* =========================================================
+           ROOM TABLE
+        ========================================================= */
 
         .table-wrapper {
             width: 100%;
+
             overflow-x: auto;
+
             border: 1px solid var(--border);
+
             border-radius: 15px;
+
             background: white;
+
             margin-bottom: 48px;
-            box-shadow: 0 10px 28px rgba(16, 24, 40, 0.055);
+
+            box-shadow: var(--shadow-sm);
         }
 
         .room-table {
             width: 100%;
+
             border-collapse: separate;
             border-spacing: 0;
+
             min-width: 720px;
         }
 
         .room-table th {
-            background: #f8fafc;
+            background: var(--surface-soft);
+
             text-align: left;
+
             padding: 15px 17px;
+
             font-size: 11px;
-            color: #667085;
-            font-weight: 750;
+
+            color: var(--muted);
+
+            font-weight: 700;
+
             letter-spacing: 0.65px;
+
             border-bottom: 1px solid var(--border);
         }
 
         .room-table td {
             padding: 18px 17px;
+
             border-bottom: 1px solid #eaecf0;
+
             font-size: 14px;
+
+            font-weight: 400;
+
             vertical-align: middle;
         }
 
@@ -401,27 +625,41 @@
 
         .room-type {
             color: var(--muted);
+            font-weight: 500;
         }
 
-        /* STATUS */
+
+        /* =========================================================
+           STATUS
+        ========================================================= */
 
         .status {
             display: inline-flex;
+
             align-items: center;
+
             gap: 8px;
+
             font-size: 13px;
+
             font-weight: 700;
+
             color: var(--green);
+
             background: var(--green-soft);
+
             border-radius: 999px;
+
             padding: 5px 10px;
         }
 
         .status-dot {
             width: 7px;
             height: 7px;
+
             border-radius: 50%;
-            background: #12b76a;
+
+            background: var(--green-bright);
         }
 
         .status.booked {
@@ -433,18 +671,30 @@
             background: #d92d20;
         }
 
-        /* BOOK BUTTON */
+
+        /* =========================================================
+           BOOK BUTTON
+        ========================================================= */
 
         .book-button {
             display: inline-block;
+
             padding: 8px 15px;
+
             border: 1px solid #c7d7fe;
+
             border-radius: 8px;
+
             color: var(--accent);
-            background: #eff4ff;
+
+            background: var(--accent-soft);
+
             text-decoration: none;
+
             font-size: 13px;
+
             font-weight: 700;
+
             transition:
                 background 0.2s ease,
                 color 0.2s ease,
@@ -454,41 +704,63 @@
 
         .book-button:hover {
             background: var(--accent);
+
             border-color: var(--accent);
+
             color: white;
+
             transform: translateY(-1px);
         }
 
-        /* INFORMATION */
+
+        /* =========================================================
+           INFORMATION CARDS
+        ========================================================= */
 
         .info-grid {
             display: grid;
+
             grid-template-columns: 1fr 1fr;
+
             gap: 22px;
         }
 
         .info-box {
             background: white;
+
             border: 1px solid var(--border);
+
             border-radius: 15px;
+
             padding: 27px;
-            box-shadow: 0 10px 28px rgba(16, 24, 40, 0.05);
+
+            box-shadow: var(--shadow-sm);
         }
 
         .info-box h3 {
             font-size: 19px;
+
             color: var(--text);
+
+            font-weight: 700;
+
             margin-bottom: 14px;
+
             letter-spacing: -0.2px;
         }
 
         .info-item {
             display: flex;
+
             justify-content: space-between;
             align-items: center;
+
             gap: 20px;
+
             padding: 14px 0;
+
             border-bottom: 1px solid #eaecf0;
+
             font-size: 14px;
         }
 
@@ -498,33 +770,49 @@
 
         .info-label {
             color: var(--muted);
+            font-weight: 400;
         }
 
         .info-value {
-            font-weight: 650;
+            font-weight: 700;
             color: var(--text);
         }
 
         .info-link {
             color: var(--accent);
+
             text-decoration: none;
+
+            transition: color 0.2s ease;
         }
 
         .info-link:hover {
             color: var(--accent-dark);
         }
 
-        /* FOOTER */
+
+        /* =========================================================
+           FOOTER
+        ========================================================= */
 
         footer {
             background: var(--navy);
+
             color: #98a2b3;
+
             text-align: center;
+
             padding: 25px 20px;
+
             font-size: 13px;
+
+            font-weight: 400;
         }
 
-        /* TABLET */
+
+        /* =========================================================
+           TABLET
+        ========================================================= */
 
         @media (max-width: 1100px) {
 
@@ -535,8 +823,8 @@
             .search-button {
                 width: 100%;
             }
-
         }
+
 
         @media (max-width: 900px) {
 
@@ -555,15 +843,18 @@
             .welcome {
                 padding: 45px 40px;
             }
-
         }
 
-        /* MOBILE */
+
+        /* =========================================================
+           MOBILE
+        ========================================================= */
 
         @media (max-width: 600px) {
 
             header {
                 padding: 0 18px;
+
                 min-height: 68px;
             }
 
@@ -594,11 +885,15 @@
 
             .welcome {
                 padding: 34px 25px;
+
                 border-radius: 17px;
             }
 
             .welcome h1 {
                 font-size: 31px;
+
+                line-height: 1.18;
+
                 letter-spacing: -0.8px;
             }
 
@@ -608,6 +903,7 @@
 
             .search-panel {
                 padding: 23px 19px;
+
                 border-radius: 15px;
             }
 
@@ -617,7 +913,9 @@
 
             .section-heading {
                 align-items: flex-start;
+
                 gap: 8px;
+
                 flex-direction: column;
             }
 
@@ -632,7 +930,6 @@
             .login {
                 padding: 8px 13px;
             }
-
         }
 
     </style>
@@ -642,568 +939,597 @@
 
 <body>
 
-<header>
+    <!-- =========================================================
+         HEADER
+    ========================================================== -->
 
-    <a href="/" class="brand">
+    <header>
 
-        <div class="brand-mark">
-            CS
-        </div>
+        <a href="/" class="brand">
 
-        <div class="brand-name">
-            CampusSpace
-        </div>
+            <div class="brand-mark">
+                CS
+            </div>
 
-    </a>
+            <div class="brand-name">
+                CampusSpace
+            </div>
 
-
-    <nav>
-
-        <a href="/">
-            Home
-        </a>
-
-        <a href="/find-room">
-            Rooms
-        </a>
-
-        <a href="/my-bookings">
-            My Bookings
-        </a>
-
-        <a href="#">
-            Help
         </a>
 
 
-        {% if session.get("user_id") %}
+        <nav>
 
-            <span style="color:#d0d5dd; font-size:14px;">
-                Welcome, {{ session.get("user_name") }}
-            </span>
+            <a href="/">
+                Home
+            </a>
+
+            <a href="/find-room">
+                Rooms
+            </a>
+
+            <a href="/my-bookings">
+                My Bookings
+            </a>
+
+            <a href="#">
+                Help
+            </a>
 
 
-            {% if session.get("user_role") == "admin" %}
+            {% if session.get("user_id") %}
 
-                <a href="/admin">
-                    Admin Dashboard
+                <span style="color:#d0d5dd; font-size:14px;">
+                    Welcome, {{ session.get("user_name") }}
+                </span>
+
+
+                {% if session.get("user_role") == "admin" %}
+
+                    <a href="/admin">
+                        Admin Dashboard
+                    </a>
+
+                {% endif %}
+
+
+                <a href="/logout" class="login">
+                    Logout
+                </a>
+
+            {% else %}
+
+                <a href="/login" class="login">
+                    Login
                 </a>
 
             {% endif %}
 
+        </nav>
 
-            <a href="/logout" class="login">
-                Logout
-            </a>
-
-
-        {% else %}
-
-            <a href="/login" class="login">
-                Login
-            </a>
-
-        {% endif %}
-
-    </nav>
-
-</header>
+    </header>
 
 
-<main>
+    <!-- =========================================================
+         MAIN CONTENT
+    ========================================================== -->
 
-    <!-- HERO -->
-
-    <section class="welcome">
-
-        <div class="welcome-content">
-
-            <div class="welcome-badge">
-
-                <span class="welcome-badge-dot"></span>
-
-                Campus space management made simple
-
-            </div>
-
-            <h1>
-                Welcome to CampusSpace
-            </h1>
-
-            <p class="welcome-description">
-                Find available classrooms, laboratories and meeting spaces,
-                then reserve the right room for your campus activities.
-            </p>
-
-        </div>
-
-    </section>
+    <main>
 
 
-    <!-- SEARCH -->
+        <!-- HERO -->
 
-    <section class="search-panel">
+        <section class="welcome">
 
-        <div class="search-header">
+            <div class="welcome-content">
 
-            <h2>
-                Find a room
-            </h2>
+                <div class="welcome-badge">
 
-            <p>
-                Search campus spaces by room type, date and time.
-            </p>
+                    <span class="welcome-badge-dot"></span>
 
-        </div>
+                    Campus space management made simple
+
+                </div>
 
 
-        <div class="search-fields">
+                <h1>
+                    Welcome to CampusSpace
+                </h1>
 
-            <div class="field">
 
-                <label>
-                    Room or building
-                </label>
-
-                <input
-                    type="text"
-                    placeholder="e.g. A-101">
+                <p class="welcome-description">
+                    Find available classrooms, laboratories and meeting spaces,
+                    then reserve the right room for your campus activities.
+                </p>
 
             </div>
 
-
-            <div class="field">
-
-                <label>
-                    Room type
-                </label>
-
-                <select>
-
-                    <option>
-                        Any type
-                    </option>
-
-                    <option>
-                        Classroom
-                    </option>
-
-                    <option>
-                        Computer Laboratory
-                    </option>
-
-                    <option>
-                        Meeting Room
-                    </option>
-
-                    <option>
-                        Seminar Hall
-                    </option>
-
-                    <option>
-                        Auditorium
-                    </option>
-
-                </select>
-
-            </div>
+        </section>
 
 
-            <div class="field">
+        <!-- SEARCH -->
 
-                <label>
-                    Date
-                </label>
+        <section class="search-panel">
 
-                <input type="date">
-
-            </div>
-
-
-            <div class="field">
-
-                <label>
-                    Time
-                </label>
-
-                <select>
-
-                    <option>
-                        Any time
-                    </option>
-
-                    <option>
-                        09:00 AM
-                    </option>
-
-                    <option>
-                        10:00 AM
-                    </option>
-
-                    <option>
-                        11:00 AM
-                    </option>
-
-                    <option>
-                        12:00 PM
-                    </option>
-
-                    <option>
-                        01:00 PM
-                    </option>
-
-                    <option>
-                        02:00 PM
-                    </option>
-
-                    <option>
-                        03:00 PM
-                    </option>
-
-                    <option>
-                        04:00 PM
-                    </option>
-
-                </select>
-
-            </div>
-
-
-            <a
-                href="/find-room"
-                class="search-button"
-                style="display:flex;align-items:center;justify-content:center;text-decoration:none;">
-
-                Search
-
-            </a>
-
-        </div>
-
-    </section>
-
-
-    <!-- ROOMS -->
-
-    <section>
-
-        <div class="section-heading">
-
-            <div class="section-title-wrap">
+            <div class="search-header">
 
                 <h2>
-                    Campus spaces
+                    Find a room
                 </h2>
 
                 <p>
-                    Browse rooms currently available for booking.
+                    Search campus spaces by room type, date and time.
                 </p>
 
             </div>
 
 
-            <a href="/find-room">
-                View all rooms →
-            </a>
-
-        </div>
+            <div class="search-fields">
 
 
-        <div class="table-wrapper">
+                <div class="field">
 
-            <table class="room-table">
+                    <label>
+                        Room or building
+                    </label>
 
-                <thead>
+                    <input
+                        type="text"
+                        placeholder="e.g. A-101">
 
-                    <tr>
-
-                        <th>
-                            ROOM
-                        </th>
-
-                        <th>
-                            TYPE
-                        </th>
-
-                        <th>
-                            CAPACITY
-                        </th>
-
-                        <th>
-                            LOCATION
-                        </th>
-
-                        <th>
-                            STATUS
-                        </th>
-
-                        <th></th>
-
-                    </tr>
-
-                </thead>
+                </div>
 
 
-                <tbody>
+                <div class="field">
 
-                    <tr>
+                    <label>
+                        Room type
+                    </label>
 
-                        <td class="room-name">
-                            Room A-101
-                        </td>
+                    <select>
 
-                        <td class="room-type">
+                        <option>
+                            Any type
+                        </option>
+
+                        <option>
                             Classroom
-                        </td>
+                        </option>
 
-                        <td>
-                            40
-                        </td>
-
-                        <td>
-                            1st Floor
-                        </td>
-
-                        <td>
-
-                            <span class="status">
-
-                                <span class="status-dot"></span>
-
-                                Available
-
-                            </span>
-
-                        </td>
-
-                        <td>
-
-                            <a
-                                href="/book-room?room_id=1"
-                                class="book-button">
-
-                                Book
-
-                            </a>
-
-                        </td>
-
-                    </tr>
-
-
-                    <tr>
-
-                        <td class="room-name">
-                            Lab B-204
-                        </td>
-
-                        <td class="room-type">
+                        <option>
                             Computer Laboratory
-                        </td>
+                        </option>
 
-                        <td>
-                            35
-                        </td>
-
-                        <td>
-                            2nd Floor
-                        </td>
-
-                        <td>
-
-                            <span class="status">
-
-                                <span class="status-dot"></span>
-
-                                Available
-
-                            </span>
-
-                        </td>
-
-                        <td>
-
-                            <a
-                                href="/book-room?room_id=2"
-                                class="book-button">
-
-                                Book
-
-                            </a>
-
-                        </td>
-
-                    </tr>
-
-
-                    <tr>
-
-                        <td class="room-name">
-                            Meeting Room C-302
-                        </td>
-
-                        <td class="room-type">
+                        <option>
                             Meeting Room
-                        </td>
+                        </option>
 
-                        <td>
-                            15
-                        </td>
+                        <option>
+                            Seminar Hall
+                        </option>
 
-                        <td>
-                            3rd Floor
-                        </td>
+                        <option>
+                            Auditorium
+                        </option>
 
-                        <td>
+                    </select>
 
-                            <span class="status">
-
-                                <span class="status-dot"></span>
-
-                                Available
-
-                            </span>
-
-                        </td>
-
-                        <td>
-
-                            <a
-                                href="/book-room?room_id=3"
-                                class="book-button">
-
-                                Book
-
-                            </a>
-
-                        </td>
-
-                    </tr>
-
-                </tbody>
-
-            </table>
-
-        </div>
-
-    </section>
+                </div>
 
 
-    <!-- INFORMATION -->
+                <div class="field">
 
-    <section class="info-grid">
+                    <label>
+                        Date
+                    </label>
 
-        <div class="info-box">
+                    <input type="date">
 
-            <h3>
-                Quick access
-            </h3>
+                </div>
 
-            <div class="info-item">
 
-                <span class="info-label">
-                    Find a room
-                </span>
+                <div class="field">
+
+                    <label>
+                        Time
+                    </label>
+
+                    <select>
+
+                        <option>
+                            Any time
+                        </option>
+
+                        <option>
+                            09:00 AM
+                        </option>
+
+                        <option>
+                            10:00 AM
+                        </option>
+
+                        <option>
+                            11:00 AM
+                        </option>
+
+                        <option>
+                            12:00 PM
+                        </option>
+
+                        <option>
+                            01:00 PM
+                        </option>
+
+                        <option>
+                            02:00 PM
+                        </option>
+
+                        <option>
+                            03:00 PM
+                        </option>
+
+                        <option>
+                            04:00 PM
+                        </option>
+
+                    </select>
+
+                </div>
+
 
                 <a
                     href="/find-room"
-                    class="info-value info-link">
+                    class="search-button"
+                    style="display:flex;align-items:center;justify-content:center;text-decoration:none;">
 
-                    Open
-
-                </a>
-
-            </div>
-
-
-            <div class="info-item">
-
-                <span class="info-label">
-                    My bookings
-                </span>
-
-                <a
-                    href="/my-bookings"
-                    class="info-value info-link">
-
-                    View
+                    Search
 
                 </a>
 
             </div>
 
-
-            <div class="info-item">
-
-                <span class="info-label">
-                    Room availability
-                </span>
-
-                <span class="info-value">
-                    Live
-                </span>
-
-            </div>
-
-        </div>
+        </section>
 
 
-        <div class="info-box">
+        <!-- ROOMS -->
 
-            <h3>
-                Booking information
-            </h3>
+        <section>
 
-            <div class="info-item">
+            <div class="section-heading">
 
-                <span class="info-label">
-                    Available spaces
-                </span>
+                <div class="section-title-wrap">
 
-                <span class="info-value">
-                    3
-                </span>
+                    <h2>
+                        Campus spaces
+                    </h2>
+
+                    <p>
+                        Browse rooms currently available for booking.
+                    </p>
+
+                </div>
+
+
+                <a href="/find-room">
+                    View all rooms →
+                </a>
 
             </div>
 
 
-            <div class="info-item">
+            <div class="table-wrapper">
 
-                <span class="info-label">
-                    Booking method
-                </span>
+                <table class="room-table">
 
-                <span class="info-value">
-                    Online
-                </span>
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                ROOM
+                            </th>
+
+                            <th>
+                                TYPE
+                            </th>
+
+                            <th>
+                                CAPACITY
+                            </th>
+
+                            <th>
+                                LOCATION
+                            </th>
+
+                            <th>
+                                STATUS
+                            </th>
+
+                            <th></th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+
+                        <!-- ROOM A-101 -->
+
+                        <tr>
+
+                            <td class="room-name">
+                                Room A-101
+                            </td>
+
+                            <td class="room-type">
+                                Classroom
+                            </td>
+
+                            <td>
+                                40
+                            </td>
+
+                            <td>
+                                1st Floor
+                            </td>
+
+                            <td>
+
+                                <span class="status">
+
+                                    <span class="status-dot"></span>
+
+                                    Available
+
+                                </span>
+
+                            </td>
+
+                            <td>
+
+                                <a
+                                    href="/book-room?room_id=1"
+                                    class="book-button">
+
+                                    Book
+
+                                </a>
+
+                            </td>
+
+                        </tr>
+
+
+                        <!-- LAB B-204 -->
+
+                        <tr>
+
+                            <td class="room-name">
+                                Lab B-204
+                            </td>
+
+                            <td class="room-type">
+                                Computer Laboratory
+                            </td>
+
+                            <td>
+                                35
+                            </td>
+
+                            <td>
+                                2nd Floor
+                            </td>
+
+                            <td>
+
+                                <span class="status">
+
+                                    <span class="status-dot"></span>
+
+                                    Available
+
+                                </span>
+
+                            </td>
+
+                            <td>
+
+                                <a
+                                    href="/book-room?room_id=2"
+                                    class="book-button">
+
+                                    Book
+
+                                </a>
+
+                            </td>
+
+                        </tr>
+
+
+                        <!-- MEETING ROOM C-302 -->
+
+                        <tr>
+
+                            <td class="room-name">
+                                Meeting Room C-302
+                            </td>
+
+                            <td class="room-type">
+                                Meeting Room
+                            </td>
+
+                            <td>
+                                15
+                            </td>
+
+                            <td>
+                                3rd Floor
+                            </td>
+
+                            <td>
+
+                                <span class="status">
+
+                                    <span class="status-dot"></span>
+
+                                    Available
+
+                                </span>
+
+                            </td>
+
+                            <td>
+
+                                <a
+                                    href="/book-room?room_id=3"
+                                    class="book-button">
+
+                                    Book
+
+                                </a>
+
+                            </td>
+
+                        </tr>
+
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+
+        <!-- INFORMATION -->
+
+        <section class="info-grid">
+
+
+            <!-- QUICK ACCESS -->
+
+            <div class="info-box">
+
+                <h3>
+                    Quick access
+                </h3>
+
+
+                <div class="info-item">
+
+                    <span class="info-label">
+                        Find a room
+                    </span>
+
+                    <a
+                        href="/find-room"
+                        class="info-value info-link">
+
+                        Open
+
+                    </a>
+
+                </div>
+
+
+                <div class="info-item">
+
+                    <span class="info-label">
+                        My bookings
+                    </span>
+
+                    <a
+                        href="/my-bookings"
+                        class="info-value info-link">
+
+                        View
+
+                    </a>
+
+                </div>
+
+
+                <div class="info-item">
+
+                    <span class="info-label">
+                        Room availability
+                    </span>
+
+                    <span class="info-value">
+                        Live
+                    </span>
+
+                </div>
 
             </div>
 
 
-            <div class="info-item">
+            <!-- BOOKING INFORMATION -->
 
-                <span class="info-label">
-                    Confirmation
-                </span>
+            <div class="info-box">
 
-                <span class="info-value">
-                    Immediate
-                </span>
+                <h3>
+                    Booking information
+                </h3>
+
+
+                <div class="info-item">
+
+                    <span class="info-label">
+                        Available spaces
+                    </span>
+
+                    <span class="info-value">
+                        3
+                    </span>
+
+                </div>
+
+
+                <div class="info-item">
+
+                    <span class="info-label">
+                        Booking method
+                    </span>
+
+                    <span class="info-value">
+                        Online
+                    </span>
+
+                </div>
+
+
+                <div class="info-item">
+
+                    <span class="info-label">
+                        Confirmation
+                    </span>
+
+                    <span class="info-value">
+                        Immediate
+                    </span>
+
+                </div>
 
             </div>
 
-        </div>
-
-    </section>
-
-</main>
+        </section>
 
 
-<footer>
+    </main>
 
-    CampusSpace · Campus Room & Facility Booking System · 2026
 
-</footer>
+    <!-- FOOTER -->
+
+    <footer>
+
+        CampusSpace · Campus Room &amp; Facility Booking System · 2026
+
+    </footer>
 
 
 </body>
