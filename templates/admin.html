@@ -716,11 +716,11 @@
 
                             <td>
 
-                                <span class="{{ 'available' if booking['status'] == 'Confirmed' else 'booked' }}">
+                                <span class="{{ 'available' if booking['status']|lower == 'confirmed' else 'booked' }}">
                                     {{ booking["status"] }}
                                 </span>
 
-                                {% if booking["status"] == "Confirmed" %}
+                                {% if booking["status"]|lower == "confirmed" %}
 
                                     <form
                                         method="POST"
