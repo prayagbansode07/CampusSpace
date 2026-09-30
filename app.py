@@ -94,8 +94,8 @@ def send_admin_invitation_email(receiver_email, token):
     sender_email = os.environ.get("CAMPUSSPACE_EMAIL")
 
     invitation_link = (
-        "https://campusspace-gota.onrender.com/accept-admin-invitation/"
-        + token
+        "https://campusspace-production-b1f4.up.railway.app/"
+        "accept-admin-invitation/" + token
     )
 
     subject = "CampusSpace Admin Invitation"
@@ -116,7 +116,6 @@ CampusSpace
 """
 
     send_email_via_brevo(receiver_email, subject, body)
-
 def init_db():
     connection = get_db()
 
