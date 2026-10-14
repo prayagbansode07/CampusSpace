@@ -174,7 +174,7 @@ def init_db():
             """, room)
         except sqlite3.IntegrityError:
             pass
-    
+
     connection.execute("""
         CREATE TABLE IF NOT EXISTS timetable (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -238,6 +238,7 @@ def home():
 # FIND ROOM
 # -----------------------------
 
+
 @app.route("/find-room")
 def find_room():
 
@@ -247,64 +248,76 @@ def find_room():
 
     connection = get_db()
 
+    # Check whether the logged-in user is approved faculty.
+    is_approved_faculty = False
+
+    if "user_id" in session:
+        user = connection.execute("""
+            SELECT role, faculty_status
+            FROM users
+            WHERE id = ?
+        """, (session["user_id"],)).fetchone()
+
+        if user:
+            is_approved_faculty = (
+                user["role"] == "faculty"
+                and user["faculty_status"] == "approved"
+            )
+
     rooms = connection.execute("""
         SELECT id, name, room_type, capacity, floor
         FROM rooms
         ORDER BY id
     """).fetchall()
 
-    # If the student has not searched yet,
-    # show all rooms.
+    # No search submitted: show all rooms as before.
     if not selected_date or not selected_time or not selected_duration:
-
         connection.close()
-
         return render_template(
             "find_room.html",
             rooms=rooms,
             selected_date=selected_date,
             selected_time=selected_time,
-            selected_duration=selected_duration
+            selected_duration=selected_duration,
+            room_conflicts={}
         )
 
     try:
         duration = int(selected_duration)
 
-    except ValueError:
-        connection.close()
+        requested_start = datetime.strptime(
+            f"{selected_date} {selected_time}",
+            "%Y-%m-%d %H:%M"
+        )
 
-        flash("Invalid duration selected. Please try again.", "error")
+    except (ValueError, TypeError):
+        connection.close()
+        flash("Invalid date, time, or duration selected.", "error")
         return redirect(url_for("find_room"))
 
-    requested_start = datetime.strptime(
-        f"{selected_date} {selected_time}",
-        "%Y-%m-%d %H:%M"
-    )
+    if duration not in (1, 2, 3, 4):
+        connection.close()
+        flash("Invalid duration selected.", "error")
+        return redirect(url_for("find_room"))
 
     requested_end = requested_start + timedelta(hours=duration)
+    day_name = requested_start.strftime("%A")
 
     available_rooms = []
-
-    # Convert selected date into weekly day
-    day_name = requested_start.strftime("%A")
+    room_conflicts = {}
 
     for room in rooms:
 
+        room_id = room["id"]
         room_available = True
+        student_conflict = False
 
-        # --------------------------------
-        # CHECK WEEKLY LECTURE TIMETABLE
-        # --------------------------------
-
+        # Keep existing timetable restrictions.
         lectures = connection.execute("""
             SELECT start_time, end_time
             FROM timetable
-            WHERE room_id = ?
-            AND day = ?
-        """, (
-            room["id"],
-            day_name
-        )).fetchall()
+            WHERE room_id = ? AND day = ?
+        """, (room_id, day_name)).fetchall()
 
         for lecture in lectures:
 
@@ -325,43 +338,54 @@ def find_room():
                 room_available = False
                 break
 
-        # --------------------------------
-        # CHECK EXISTING BOOKINGS
-        # --------------------------------
+        if not room_available:
+            continue
 
-        if room_available:
+        # Check existing non-cancelled bookings.
+        bookings = connection.execute("""
+            SELECT booking_time, duration, booker_role
+            FROM bookings
+            WHERE room_id = ?
+              AND booking_date = ?
+              AND LOWER(status) != 'cancelled'
+        """, (room_id, selected_date)).fetchall()
 
-            bookings = connection.execute("""
-                SELECT booking_time, duration
-                FROM bookings
-                WHERE room_id = ?
-                AND booking_date = ?
-                AND LOWER(status) != 'cancelled'
-            """, (
-                room["id"],
-                selected_date
-            )).fetchall()
+        for booking in bookings:
 
-            for booking in bookings:
+            booking_start = datetime.strptime(
+                f"{selected_date} {booking['booking_time']}",
+                "%Y-%m-%d %I:%M %p"
+            )
 
-                booking_start = datetime.strptime(
-                    f"{selected_date} {booking['booking_time']}",
-                    "%Y-%m-%d %I:%M %p"
-                )
+            booking_end = booking_start + timedelta(
+                hours=booking["duration"]
+            )
 
-                booking_end = booking_start + timedelta(
-                    hours=booking["duration"]
-                )
+            if (
+                requested_start < booking_end
+                and requested_end > booking_start
+            ):
 
-                if (
-                    requested_start < booking_end
-                    and requested_end > booking_start
-                ):
+                if booking["booker_role"] == "student":
+                    student_conflict = True
+                else:
+                    # Existing faculty or other non-student booking.
                     room_available = False
                     break
 
-        if room_available:
+        if room_available and not student_conflict:
             available_rooms.append(room)
+
+        elif (
+            is_approved_faculty
+            and room_available
+            and student_conflict
+        ):
+            # Faculty can see the room, with a conflict label.
+            available_rooms.append(room)
+            room_conflicts[room_id] = (
+                "Conflicts with a student booking — faculty priority"
+            )
 
     connection.close()
 
@@ -370,8 +394,10 @@ def find_room():
         rooms=available_rooms,
         selected_date=selected_date,
         selected_time=selected_time,
-        selected_duration=selected_duration
+        selected_duration=selected_duration,
+        room_conflicts=room_conflicts
     )
+
 
 @app.route("/my-bookings")
 def my_bookings():
@@ -744,7 +770,7 @@ def resend_otp():
         return redirect(url_for("verify_otp"))
 
     return redirect(url_for("verify_otp"))
-    
+
 # -----------------------------
 # BOOK ROOM
 # -----------------------------
@@ -797,6 +823,15 @@ def book_room():
 
         name = logged_in_user["name"]
         email = logged_in_user["email"]
+        user_role = logged_in_user["role"]
+        # Verify faculty approval before granting priority.
+        if (
+            logged_in_user["role"] == "faculty"
+            and logged_in_user["faculty_status"] != "approved"
+        ):
+            flash("Your faculty account is not approved yet.", "error")
+            return redirect(url_for("find_room"))
+
         booking_date = request.form["date"]
         booking_time =request.form["time"]
         duration_text = request.form["duration"]
@@ -826,7 +861,7 @@ def book_room():
 
         requested_end = requested_start + timedelta(hours=duration)
 
-                # Check for timetable conflicts
+        # Check for timetable conflicts
         day_name = requested_start.strftime("%A")
 
         lectures = connection.execute("""
@@ -851,18 +886,21 @@ def book_room():
                 "%Y-%m-%d %H:%M"
             )
 
+
             if (
                 requested_start < lecture_end
                 and requested_end > lecture_start
             ):
-
-                connection.close()
-
                 connection.close()
                 flash("This room is reserved for a lecture during the selected time.", "error")
                 return redirect(url_for("find_room"))
 
+
+
         # Check for overlapping bookings
+        student_bookings_to_cancel = []
+        cancelled_student_bookings = []
+
         for booking in existing_bookings:
 
             existing_start = datetime.strptime(
@@ -874,40 +912,40 @@ def book_room():
                 hours=booking["duration"]
             )
 
-            # Check whether the two bookings overlap
+            # Check whether the two bookings overlap.
             if requested_start < existing_end and requested_end > existing_start:
 
-                # Get the role of the existing booking
                 existing_role = booking["booker_role"]
 
-                # Faculty has priority over Student
-                if user_role == "faculty" and existing_role == "student":
-
-                    connection.execute("""
-                        UPDATE bookings
-                        SET status = 'Cancelled'
-                        WHERE id = ?
-                    """, (booking["id"],))
-
+                # Faculty priority applies only to approved faculty.
+                if (
+                    user_role == "faculty"
+                    and logged_in_user["role"] == "faculty"
+                    and logged_in_user["faculty_status"] == "approved"
+                    and existing_role == "student"
+                ):
+                    # Defer cancellation until the new booking is saved.
+                    student_bookings_to_cancel.append(booking["id"])
                     continue
 
-                # Student cannot take a slot already booked by Faculty
+                # Students cannot override faculty bookings.
                 elif user_role == "student" and existing_role == "faculty":
-
                     connection.close()
-
-                    connection.close()
-                    flash("This room is already reserved by faculty for the selected time.", "error")
+                    flash(
+                        "This room is already reserved by faculty for the selected time.",
+                        "error"
+                    )
                     return redirect(url_for("find_room"))
 
-                # Faculty vs Faculty OR Student vs Student
+                # Other overlapping bookings remain blocked.
                 else:
-
                     connection.close()
-
-                    connection.close()
-                    flash("This room is already booked for the selected time.", "error")
+                    flash(
+                        "This room is already booked for the selected time.",
+                        "error"
+                    )
                     return redirect(url_for("find_room"))
+
 
             # Save booking
         connection.execute("""
@@ -937,8 +975,60 @@ def book_room():
         ))
 
 
+
+        # Save the new booking first.
+
+        # Cancel overlapping student bookings only after
+        # the faculty booking has been saved successfully.
+        for student_booking_id in student_bookings_to_cancel:
+
+            student_booking = connection.execute("""
+                SELECT name, email, booking_date, booking_time
+                FROM bookings
+                WHERE id = ?
+            """, (student_booking_id,)).fetchone()
+
+            connection.execute("""
+                UPDATE bookings
+                SET status = 'Cancelled'
+                WHERE id = ?
+            """, (student_booking_id,))
+
+            if student_booking:
+                cancelled_student_bookings.append({
+                    "name": student_booking["name"],
+                    "email": student_booking["email"],
+                    "booking_date": student_booking["booking_date"],
+                    "booking_time": student_booking["booking_time"]
+                })
+
         connection.commit()
         connection.close()
+
+
+        for student_booking in cancelled_student_bookings:
+            try:
+                send_email_via_resend(
+                    student_booking["email"],
+                    "CampusSpace Booking Cancelled — Faculty Priority",
+                    f"""Hello {student_booking['name']},
+
+Your CampusSpace room booking has been cancelled because an approved faculty booking takes priority for an overlapping time slot.
+
+Date: {student_booking['booking_date']}
+Time: {student_booking['booking_time']}
+
+Please visit CampusSpace to find another available room.
+
+Regards,
+CampusSpace
+"""
+                )
+            except Exception as e:
+                print("FACULTY PRIORITY EMAIL ERROR:", e)
+
+
+
 
 
         return f"""
@@ -1347,7 +1437,7 @@ def manage_timetable():
         connection.close()
 
         return redirect(url_for("manage_timetable"))
-    
+
     rooms = connection.execute("""
         SELECT *
         FROM rooms
@@ -1629,4 +1719,4 @@ if __name__ == "__main__":
         port=int(os.environ.get("PORT", 5000)),
         debug=False
     )
-    
+

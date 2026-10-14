@@ -416,6 +416,20 @@
                         {{ room["name"] }}
                     </h2>
 
+                    {% if room_conflicts and room["id"] in room_conflicts %}
+                        <div style="
+                            margin-bottom: 14px;
+                            padding: 10px 12px;
+                            background: #fff7ed;
+                            color: #9a3412;
+                            border: 1px solid #fed7aa;
+                            border-radius: 7px;
+                            font-size: 13px;
+                            font-weight: 600;
+                        ">
+                            {{ room_conflicts[room["id"]] }}
+                        </div>
+                    {% endif %}
 
                     <div class="room-info">
 
