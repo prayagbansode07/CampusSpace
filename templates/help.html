@@ -1,0 +1,224 @@
+ 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Help & Support | CampusSpace</title>
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f6fb;
+            color: #1f2937;
+        }
+
+        header {
+            background: #172554;
+            color: white;
+            padding: 22px 7%;
+        }
+
+        header h1 { margin: 0 0 8px; font-size: 26px; }
+        header p { margin: 0; color: #dbeafe; }
+
+        nav { margin-top: 18px; display: flex; flex-wrap: wrap; gap: 18px; }
+        nav a { color: white; text-decoration: none; font-size: 14px; }
+        nav a:hover { text-decoration: underline; }
+
+        main { max-width: 1000px; margin: 30px auto; padding: 0 20px; }
+
+        .welcome {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 3px 14px #0f172a0d;
+            margin-bottom: 24px;
+        }
+
+        .welcome h2 { margin-top: 0; color: #172554; }
+        .welcome p { line-height: 1.6; color: #4b5563; }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 18px;
+        }
+
+        .card {
+            background: white;
+            padding: 22px;
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .card h3 { margin-top: 0; color: #1d4ed8; }
+        .card p, .card li { line-height: 1.6; color: #4b5563; }
+        .card ul { padding-left: 20px; }
+
+        details {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 9px;
+            padding: 16px;
+            margin-bottom: 10px;
+        }
+
+        summary { cursor: pointer; font-weight: 600; color: #1f2937; }
+        details p { margin-bottom: 0; line-height: 1.6; color: #4b5563; }
+
+        .support {
+            margin-top: 24px;
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 12px;
+            padding: 22px;
+        }
+
+        .support h2 { margin-top: 0; color: #1e40af; }
+        .support p { line-height: 1.6; }
+
+        .button {
+            display: inline-block;
+            background: #1d4ed8;
+            color: white;
+            padding: 11px 16px;
+            border-radius: 7px;
+            text-decoration: none;
+            margin: 6px 8px 0 0;
+        }
+
+        .button:hover { background: #1e40af; }
+
+        footer {
+            text-align: center;
+            padding: 25px;
+            color: #6b7280;
+            font-size: 13px;
+        }
+
+        @media (max-width: 500px) {
+            header { padding: 20px; }
+            main { margin-top: 20px; padding: 0 14px; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Help & Support</h1>
+        <p>Your guide to using CampusSpace</p>
+        <nav>
+            <a href="/">Home</a>
+            <a href="/find-room">Find Rooms</a>
+            <a href="/my-bookings">My Bookings</a>
+            <a href="/help">Help & Support</a>
+        </nav>
+    </header>
+
+    <main>
+        <section class="welcome">
+            <h2>How can we help you?</h2>
+            <p>
+                Find answers to common questions about finding rooms, making
+                reservations, and managing your bookings. If a problem continues,
+                contact your campus administrator.
+            </p>
+        </section>
+
+        <section class="grid">
+            <article class="card">
+                <h3>Find a Room</h3>
+                <ul>
+                    <li>Open the Rooms page.</li>
+                    <li>Select your preferred date and time.</li>
+                    <li>Review the room details and availability.</li>
+                </ul>
+            </article>
+
+            <article class="card">
+                <h3>Book a Room</h3>
+                <ul>
+                    <li>Select an available room.</li>
+                    <li>Complete the booking form accurately.</li>
+                    <li>Submit the form and check My Bookings.</li>
+                </ul>
+            </article>
+
+            <article class="card">
+                <h3>Manage Bookings</h3>
+                <ul>
+                    <li>Open My Bookings to review reservations.</li>
+                    <li>Check the booking status before visiting the room.</li>
+                    <li>Use the available cancellation option if needed.</li>
+                </ul>
+            </article>
+        </section>
+
+        <section style="margin-top: 30px;">
+            <h2>Frequently Asked Questions</h2>
+
+            <details>
+                <summary>Why can't I book a room?</summary>
+                <p>
+                    The room may already be reserved, conflict with a scheduled
+                    lecture, or be unavailable for your selected time. Try another
+                    time or room.
+                </p>
+            </details>
+
+            <details>
+                <summary>Why was my booking blocked by a faculty reservation?</summary>
+                <p>
+                    CampusSpace gives approved faculty bookings priority over
+                    overlapping student bookings. Students cannot override a
+                    confirmed faculty reservation.
+                </p>
+            </details>
+
+            <details>
+                <summary>Why is my faculty account not allowed to use priority?</summary>
+                <p>
+                    Faculty priority is available only to approved faculty accounts.
+                    Contact your campus administrator if your approval status
+                    appears incorrect.
+                </p>
+            </details>
+
+            <details>
+                <summary>Where can I check my booking status?</summary>
+                <p>
+                    Open My Bookings to review your reservations and their current
+                    statuses.
+                </p>
+            </details>
+
+            <details>
+                <summary>What should I do if something goes wrong?</summary>
+                <p>
+                    Note the room, selected date and time, and any error message.
+                    Share these details with your campus administrator so they can
+                    investigate the problem.
+                </p>
+            </details>
+        </section>
+
+        <section class="support">
+            <h2>Still need help?</h2>
+            <p>
+                For account approval issues, booking conflicts, or technical
+                problems, contact your campus administrator. Include the relevant
+                room, date, time, and error message where possible.
+            </p>
+            <a class="button" href="/my-bookings">View My Bookings</a>
+            <a class="button" href="/find-room">Find Another Room</a>
+            <a class="button" href="/">Return Home</a>
+        </section>
+    </main>
+
+    <footer>
+        CampusSpace Help & Support
+    </footer>
+</body>
+</html>

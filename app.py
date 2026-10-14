@@ -233,6 +233,14 @@ def init_db():
 def home():
     return render_template("index.html")
 
+# -----------------------------
+# HELP & SUPPORT
+# -----------------------------
+
+@app.route("/help")
+def help_page():
+    return render_template("help.html")
+
 
 # -----------------------------
 # FIND ROOM
