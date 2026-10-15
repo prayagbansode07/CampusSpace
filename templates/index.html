@@ -994,7 +994,72 @@
 
                     </select>
 
+
                 </div>
+
+                <a
+                    href="/find-room"
+                    class="search-button"
+                    style="display:flex;align-items:center;justify-content:center;text-decoration:none;">
+                    Search
+                </a>
+
+            </div>
+
+        </section>
+
+
+        <!-- ROOMS -->
+
+        <section>
+
+            <div class="section-heading">
+                <h2>Campus spaces</h2>
+                <a href="/find-room">View all rooms →</a>
+            </div>
+
+            <table class="room-table">
+                <thead>
+                    <tr>
+                        <th>ROOM</th>
+                        <th>TYPE</th>
+                        <th>CAPACITY</th>
+                        <th>LOCATION</th>
+                        <th>STATUS</th>
+                        <th></th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for room in rooms %}
+                    <tr>
+                        <td class="room-name">{{ room["name"] }}</td>
+                        <td class="room-type">{{ room["room_type"] }}</td>
+                        <td>{{ room["capacity"] }}</td>
+                        <td>{{ room["floor"] }}</td>
+                        <td>
+                            <span class="status">
+                                <span class="status-dot"></span>
+                                Available
+                            </span>
+                        </td>
+                        <td>
+                            <a href="/book-room?room_id={{ room['id'] }}"
+                               class="book-button">Book</a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" style="text-align:center;padding:30px;">
+                            No rooms have been added by the admin yet.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+        </section>
+
 
                 <a
                     href="/find-room"
