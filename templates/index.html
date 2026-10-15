@@ -739,143 +739,50 @@
             </thead>
 
 
+            
             <tbody>
-
+                {% for room in rooms %}
                 <tr>
-
                     <td class="room-name">
-                        Room A-101
+                        {{ room["name"] }}
                     </td>
 
                     <td class="room-type">
-                        Classroom
+                        {{ room["room_type"] }}
                     </td>
 
                     <td>
-                        40
+                        {{ room["capacity"] }}
                     </td>
 
                     <td>
-                        1st Floor
+                        {{ room["floor"] }}
                     </td>
 
                     <td>
-
                         <span class="status">
-
                             <span class="status-dot"></span>
-
                             Available
-
                         </span>
-
                     </td>
 
                     <td>
-
                         <a
-                            href="/book-room?room_id=1"
+                            href="/book-room?room_id={{ room['id'] }}"
                             class="book-button">
-
                             Book
-
                         </a>
-
                     </td>
-
                 </tr>
-
-
+                {% else %}
                 <tr>
-
-                    <td class="room-name">
-                        Lab B-204
+                    <td colspan="6" style="text-align: center; padding: 30px;">
+                        No rooms have been added by the admin yet.
                     </td>
-
-                    <td class="room-type">
-                        Computer Laboratory
-                    </td>
-
-                    <td>
-                        35
-                    </td>
-
-                    <td>
-                        2nd Floor
-                    </td>
-
-                    <td>
-
-                        <span class="status">
-
-                            <span class="status-dot"></span>
-
-                            Available
-
-                        </span>
-
-                    </td>
-
-                    <td>
-
-                        <a
-                            href="/book-room?room_id=2"
-                            class="book-button">
-
-                            Book
-
-                        </a>
-
-                    </td>
-
                 </tr>
-
-
-                <tr>
-
-                    <td class="room-name">
-                        Meeting Room C-302
-                    </td>
-
-                    <td class="room-type">
-                        Meeting Room
-                    </td>
-
-                    <td>
-                        15
-                    </td>
-
-                    <td>
-                        3rd Floor
-                    </td>
-
-                    <td>
-
-                        <span class="status">
-
-                            <span class="status-dot"></span>
-
-                            Available
-
-                        </span>
-
-                    </td>
-
-                    <td>
-
-                        <a
-                            href="/book-room?room_id=3"
-                            class="book-button">
-
-                            Book
-
-                        </a>
-
-                    </td>
-
-                </tr>
-
+                {% endfor %}
             </tbody>
+
 
         </table>
 
