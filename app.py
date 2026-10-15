@@ -238,7 +238,24 @@ def init_db():
 
 @app.route("/")
 def home():
-    return render_template("index.html")
+    connection = get_db()
+
+    try:
+        rooms = connection.execute("""
+            SELECT id, name, room_type, capacity, floor
+            FROM rooms
+            ORDER BY id
+        """).fetchall()
+    finally:
+        connection.close()
+
+    available_spaces = len(rooms)
+
+    return render_template(
+        "index.html",
+        rooms=rooms,
+        available_spaces=available_spaces
+    )
 
 # -----------------------------
 # HELP & SUPPORT
