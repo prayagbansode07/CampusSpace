@@ -15,7 +15,10 @@ app.secret_key = os.environ.get(
     "CAMPUSSPACE_SECRET_KEY",
     "temporary-development-key"
 )
-DATABASE = "campusspace.db"
+DATABASE = os.path.join(
+    os.environ.get("DATA_DIR", "."),
+    "campusspace.db"
+)
 
 
 # -----------------------------
