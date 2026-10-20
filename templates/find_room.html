@@ -8,7 +8,7 @@
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0">
 
-    <title>Find a Room - CampusSpace</title>
+    <title>Find a Room - BookMySlot</title>
 
     <style>
 
@@ -250,6 +250,116 @@
 
         }
 
+        
+        /* Room availability cards */
+        .room-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 18px;
+        }
+
+        .room-card {
+            padding: 22px;
+            border: 1px solid #dfe3e8;
+            border-radius: 12px;
+            background: #ffffff;
+            box-shadow: 0 4px 14px rgba(23, 32, 51, 0.05);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .room-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(23, 32, 51, 0.09);
+        }
+
+        .room-card.room-available {
+            background: #eaf7ee;
+            border: 1px solid #9bd5ad;
+        }
+
+        .room-card.room-unavailable {
+            background: #fff0f0;
+            border: 1px solid #efaaaa;
+        }
+
+        .room-card.room-unchecked {
+            background: #ffffff;
+            border: 1px solid #dfe3e8;
+        }
+
+        .availability-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 16px;
+            padding: 6px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .room-available .availability-label {
+            color: #176b35;
+            background: #d2f0dc;
+        }
+
+        .room-unavailable .availability-label {
+            color: #a32121;
+            background: #ffdada;
+        }
+
+        .room-unchecked .availability-label {
+            color: #475467;
+            background: #edf0f5;
+        }
+
+        .room-card h2 {
+            margin: 0 0 14px;
+            font-size: 19px;
+            color: #172033;
+        }
+
+        .room-info {
+            color: #475467;
+            line-height: 1.9;
+            font-size: 14px;
+        }
+
+        .book-button {
+            display: inline-block;
+            margin-top: 18px;
+            padding: 10px 15px;
+            border-radius: 7px;
+            background: #176b35;
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .book-button:hover {
+            background: #12552a;
+        }
+
+        .unavailable-note {
+            margin-top: 18px;
+            color: #a32121;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        @media (max-width: 800px) {
+            .room-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 550px) {
+            .room-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
     </style>
 
 </head>
@@ -307,13 +417,23 @@
     </h1>
 
     <p class="subtitle">
-        Browse available CampusSpace rooms.
+        Browse available BookMySlot rooms.
     </p>
 
 
     <form method="GET"
-          action="/find-room"
-          class="search-form">
+    <input
+        type="hidden"
+        name="room_type"
+        value="{{ selected_room_type }}"
+    >
+            <form method="GET" action="/find-room" class="search-form">
+            <input
+                type="hidden"
+                name="room_type"
+                value="{{ selected_room_type }}"
+            >
+            
 
 
         <div class="form-grid">
@@ -330,6 +450,7 @@
                     name="date"
                     required
                     value="{{ selected_date or '' }}"
+                    min="{{ today }}"
                 >
 
             </div>
@@ -388,7 +509,10 @@
             </div>
 
 
+
+
         </div>
+
 
 
         <button
@@ -404,61 +528,66 @@
     </form>
 
 
+    
     {% if rooms %}
 
         <div class="room-grid">
 
             {% for room in rooms %}
 
-                <div class="room-card">
+                {% set checked = selected_date and selected_time and selected_duration %}
+                {% set unavailable = checked and room_conflicts and room["id"] in room_conflicts %}
 
-                    <h2>
-                        {{ room["name"] }}
-                    </h2>
+                <div class="room-card {% if not checked %}room-unchecked{% elif unavailable %}room-unavailable{% else %}room-available{% endif %}">
 
-                    {% if room_conflicts and room["id"] in room_conflicts %}
-                        <div style="
-                            margin-bottom: 14px;
-                            padding: 10px 12px;
-                            background: #fff7ed;
-                            color: #9a3412;
-                            border: 1px solid #fed7aa;
-                            border-radius: 7px;
-                            font-size: 13px;
-                            font-weight: 600;
-                        ">
-                            {{ room_conflicts[room["id"]] }}
-                        </div>
+                    {% if not checked %}
+
+                        <span class="availability-label">● Select a time to check</span>
+
+                    {% elif unavailable %}
+
+                        <span class="availability-label">● Unavailable</span>
+
+                    {% else %}
+
+                        <span class="availability-label">● Available</span>
+
                     {% endif %}
 
+                    <h2>{{ room["name"] }}</h2>
+
                     <div class="room-info">
-
                         <div>
-                            <strong>Type:</strong>
-                            {{ room["room_type"] }}
+                            <strong>Type:</strong> {{ room["room_type"] }}
                         </div>
-
                         <div>
-                            <strong>Capacity:</strong>
-                            {{ room["capacity"] }}
+                            <strong>Capacity:</strong> {{ room["capacity"] }}
                         </div>
-
                         <div>
-                            <strong>Floor:</strong>
-                            {{ room["floor"] }}
+                            <strong>Floor:</strong> {{ room["floor"] }}
                         </div>
-
                     </div>
 
+                    {% if unavailable %}
 
-                    <a
-                        href="/book-room?room_id={{ room['id'] }}"
-                        class="book-button"
-                    >
+                        <div class="unavailable-note">
+                            {{ room_conflicts[room["id"]] }}
+                        </div>
 
-                        Book Room
+                    {% elif checked %}
 
-                    </a>
+                        <a
+                            href="/book-room?room_id={{ room['id'] }}"
+                            class="book-button"
+                        >Book Room</a>
+
+                    {% else %}
+
+                        <div class="unavailable-note" style="color:#475467;">
+                            Check your date and time first
+                        </div>
+
+                    {% endif %}
 
                 </div>
 
@@ -469,12 +598,11 @@
     {% else %}
 
         <div class="empty">
-
-            No rooms are currently available.
-
+            No rooms match this category.
         </div>
 
     {% endif %}
+
 
 
 </main>
@@ -483,7 +611,7 @@
 
 <footer>
 
-    CampusSpace · Room Booking System · 2026
+    BookMySlot · Room Booking System · 2026
 
 </footer>
 

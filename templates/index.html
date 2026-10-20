@@ -7,9 +7,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <meta name="description"
-          content="CampusSpace - Campus room and facility booking system">
+          content="BookMySlot - Campus room and facility booking system">
 
-    <title>CampusSpace | Campus Room Booking</title>
+    <title>BookMySlot | Campus Room Booking</title>
 
     <!-- Inter Font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -980,6 +980,137 @@
             }
         }
 
+
+        .categories-section,
+        .popular-section {
+            margin-top: 32px;
+        }
+
+        .section-description {
+            margin: 8px 0 0;
+            color: #64748b;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 22px;
+            margin-top: 22px;
+        }
+
+        .category-card {
+            display: block;
+            overflow: hidden;
+            color: #172b4d;
+            text-decoration: none;
+            background: #fff;
+            border: 1px solid #e5eaf1;
+            border-radius: 12px;
+            box-shadow: 0 3px 12px rgba(15, 23, 42, 0.04);
+            transition: transform 160ms ease, box-shadow 160ms ease;
+        }
+
+        .category-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.09);
+        }
+
+        .category-card img {
+            display: block;
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            background: #eef2f7;
+        }
+
+        .category-card-content {
+            padding: 20px;
+        }
+
+        .category-label {
+            color: #315da8;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .category-card h3 {
+            margin: 10px 0 8px;
+            font-size: 20px;
+            font-weight: 650;
+        }
+
+        .category-card p {
+            min-height: 42px;
+            margin: 0 0 18px;
+            color: #64748b;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .category-link {
+            color: #2458a6;
+            font-size: 13px;
+            font-weight: 650;
+        }
+
+        .popular-list {
+            margin-top: 18px;
+            overflow: hidden;
+            background: #fff;
+            border: 1px solid #e5eaf1;
+            border-radius: 12px;
+        }
+
+        .popular-room {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 20px 22px;
+            border-bottom: 1px solid #edf0f5;
+        }
+
+        .popular-room:last-child {
+            border-bottom: 0;
+        }
+
+        .popular-room h3 {
+            margin: 0 0 6px;
+            font-size: 16px;
+        }
+
+        .popular-room p {
+            margin: 0;
+            color: #64748b;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 850px) {
+            .category-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 560px) {
+            .category-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .category-card img {
+                height: 200px;
+            }
+
+            .popular-room {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+        }
+
+
     </style>
 </head>
 
@@ -993,12 +1124,26 @@
 
         <a href="/" class="brand">
 
+            
             <div class="brand-mark">
-                CS
+                <svg xmlns="http://www.w3.org/2000/svg"
+                    width="34"
+                    height="34"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-label="BookMySlot logo">
+                    <rect x="3" y="5" width="18" height="16" rx="3"/>
+                    <path d="M16 3v4M8 3v4M3 10h18"/>
+                    <path d="m8 15 2.5 2.5L16 12"/>
+                </svg>
             </div>
 
             <div class="brand-name">
-                CampusSpace
+                BookMySlot
             </div>
 
         </a>
@@ -1026,6 +1171,16 @@
                     </a>
 
                 {% endif %}
+
+                
+                {% if session.get("user_role") == "faculty" %}
+
+                    <a href="{{ url_for('faculty_booking_requests') }}">
+                        Booking Requests
+                    </a>
+
+                {% endif %}
+
 
                 <a href="/logout" class="login">
                     Logout
@@ -1062,7 +1217,7 @@
                 </div>
 
                 <h1>
-                    Welcome to CampusSpace
+                    Welcome to BookMySlot
                 </h1>
 
                 <p class="welcome-description">
@@ -1159,13 +1314,64 @@
         </section>
 
 
-        <!-- ROOMS -->
 
-        <section>
+        <!-- ROOM CATEGORIES -->
+
+        <section class="categories-section">
 
             <div class="section-heading">
-                <h2>Campus spaces</h2>
+                <div>
+                    <h2>Explore campus spaces</h2>
+                    <p class="section-description">
+                        Find the right space for your next class, practical, or meeting.
+                    </p>
+                </div>
+
                 <a href="/find-room">View all rooms →</a>
+            </div>
+
+
+            <div class="category-grid">
+
+                <a class="category-card" href="/find-room?room_type=Classroom">
+                    <img
+                        src="{{ url_for('static', filename='images/vit-classroom.jpg') }}"
+                        alt="University classroom"
+                        loading="lazy">
+                    <div class="category-card-content">
+                        <span class="category-label">LEARNING SPACES</span>
+                        <h3>Classrooms</h3>
+                        <p>For lectures, presentations, and group learning.</p>
+                        <span class="category-link">Explore classrooms →</span>
+                    </div>
+                </a>
+
+                <a class="category-card" href="/find-room?room_type=Computer%20Laboratory">
+                    <img
+                        src="{{ url_for('static', filename='images/vit-computer-lab.jpg') }}"
+                        alt="Computer laboratory"
+                        loading="lazy">
+                    <div class="category-card-content">
+                        <span class="category-label">PRACTICAL SPACES</span>
+                        <h3>Computer Labs</h3>
+                        <p>For coding sessions, lab work, and projects.</p>
+                        <span class="category-link">Explore labs →</span>
+                    </div>
+                </a>
+
+                <a class="category-card" href="/find-room?room_type=Meeting%20Room">
+                    <img
+                        src="{{ url_for('static', filename='images/vit-seminar-hall.jpg') }}"
+                        alt="Seminar hall"
+                        loading="lazy">
+                    <div class="category-card-content">
+                        <span class="category-label">PRESENTATIONS</span>
+                        <h3>Seminar Halls</h3>
+                        <p>For seminars, guest lectures, workshops, and academic presentations.</p>
+                        <span class="category-link">Explore seminar halls →</span>
+                    </div>
+                </a>
+
             </div>
 
             <div class="home-room-grid">
@@ -1207,67 +1413,68 @@
                 {% endfor %}
             </div>
 
-        </section>
 
+                <a class="category-card" href="/find-room?room_type=Meeting%20Room">
+                    <img
+                        src="{{ url_for('static', filename='images/vit-seminar-hall.jpg') }}"
+                        alt="Seminar hall with presentation seating"
+                        loading="lazy">
 
-                <a
-                    href="/find-room"
-                    class="search-button"
-                    style="display:flex;align-items:center;justify-content:center;text-decoration:none;">
-
-                    Search
-
+                    <div class="category-card-content">
+                        <span class="category-label">PRESENTATIONS</span>
+                        <h3>Seminar Halls</h3>
+                        <p>For seminars, guest lectures, workshops, and academic presentations.</p>
+                        <span class="category-link">Explore seminar halls →</span>
+                    </div>
                 </a>
 
             </div>
 
         </section>
 
+        <!-- POPULAR SPACES -->
 
-        <!-- ROOMS -->
-
-        <section>
+        <section class="popular-section">
 
             <div class="section-heading">
-
-                <div class="section-title-wrap">
-
-                    <h2>Campus spaces</h2>
-
-                    <p>
-                        Browse rooms currently available for booking.
+                <div>
+                    <h2>Popular spaces</h2>
+                    <p class="section-description">
+                        Browse rooms currently listed on BookMySlot.
                     </p>
-
                 </div>
 
-                <a href="/find-room">
-                    View all rooms →
-                </a>
-
+                <a href="/find-room">Browse all →</a>
             </div>
 
-            <div class="table-wrapper">
+            <div class="popular-list">
+                {% for room in rooms %}
+                    <div class="popular-room">
+                        <div>
+                            <h3>{{ room["name"] }}</h3>
+                            <p>
+                                {{ room["room_type"] }} ·
+                                Capacity {{ room["capacity"] }} ·
+                                {{ room["floor"] }}
+                            </p>
+                        </div>
 
-                <table class="room-table">
-
-                    <thead>
-                        <tr>
-                            <th>ROOM</th>
-                            <th>TYPE</th>
-                            <th>CAPACITY</th>
-                            <th>LOCATION</th>
-                            <th>STATUS</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-
-                </table>
-
+                        <a
+                            class="book-button"
+                            href="/book-room?room_id={{ room['id'] }}">
+                            View room
+                        </a>
+                    </div>
+                {% else %}
+                    <p>No rooms have been added yet.</p>
+                {% endfor %}
             </div>
 
         </section>
+
+
+
+
 
 
         <!-- INFORMATION -->
@@ -1369,7 +1576,7 @@
     <!-- FOOTER -->
 
     <footer>
-        CampusSpace · Campus Room &amp; Facility Booking System · 2026
+        BookMySlot · Campus Room &amp; Facility Booking System · 2026
     </footer>
 
 </body>

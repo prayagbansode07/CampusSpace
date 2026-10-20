@@ -38,7 +38,7 @@ def send_email_via_brevo(receiver_email, subject, body):
 
     email_data = {
         "sender": {
-            "name": "CampusSpace",
+            "name": "BookMySlot",
             "email": "campusspace.college@gmail.com"
         },
         "to": [
@@ -73,12 +73,12 @@ def send_email_via_brevo(receiver_email, subject, body):
 
 def send_otp_email(receiver_email, otp):
 
-    subject = "CampusSpace Email Verification OTP"
+    subject = "BookMySlot Email Verification OTP"
 
     body = f"""
 Hello,
 
-Your CampusSpace verification OTP is:
+Your BookMySlot verification OTP is:
 
 {otp}
 
@@ -87,7 +87,7 @@ This OTP is valid for 10 minutes.
 If you did not request this registration, you can ignore this email.
 
 Regards,
-CampusSpace
+BookMySlot
 """
 
     send_email_via_brevo(receiver_email, subject, body)
@@ -101,12 +101,12 @@ def send_admin_invitation_email(receiver_email, token):
         "accept-admin-invitation/" + token
     )
 
-    subject = "CampusSpace Admin Invitation"
+    subject = "BookMySlot Admin Invitation"
 
     body = f"""
 Hello,
 
-You have been invited to become an administrator of CampusSpace.
+You have been invited to become an administrator of BookMySlot.
 
 Accept the invitation using this link:
 
@@ -115,7 +115,7 @@ Accept the invitation using this link:
 This invitation is valid for 24 hours.
 
 Regards,
-CampusSpace
+BookMySlot
 """
 
     send_email_via_brevo(receiver_email, subject, body)
@@ -212,6 +212,32 @@ def init_db():
             ADD COLUMN faculty_status TEXT DEFAULT 'none'
         """)
 
+    
+    
+    if "parent_email" not in user_columns:
+        connection.execute("""
+            ALTER TABLE users
+            ADD COLUMN parent_email TEXT DEFAULT ''
+        """)
+
+
+
+    
+    room_columns = [
+        row[1]
+        for row in connection.execute(
+            "PRAGMA table_info(rooms)"
+        ).fetchall()
+    ]
+
+    if "approver_id" not in room_columns:
+        connection.execute("""
+            ALTER TABLE rooms
+            ADD COLUMN approver_id INTEGER
+        """)
+
+
+
     booking_columns = [
         row[1]
         for row in connection.execute(
@@ -230,6 +256,20 @@ def init_db():
             ALTER TABLE bookings
             ADD COLUMN booker_role TEXT DEFAULT 'student'
         """)
+
+    
+    if "approver_id" not in booking_columns:
+        connection.execute("""
+            ALTER TABLE bookings
+            ADD COLUMN approver_id INTEGER
+        """)
+
+    if "approval_decided_at" not in booking_columns:
+        connection.execute("""
+            ALTER TABLE bookings
+            ADD COLUMN approval_decided_at TEXT
+        """)
+
 
     connection.commit()
     connection.close()
@@ -280,6 +320,9 @@ def find_room():
     selected_date = request.args.get("date")
     selected_time = request.args.get("time")
     selected_duration = request.args.get("duration")
+    selected_room_type = request.args.get("room_type", "")
+
+    today = datetime.today().strftime("%Y-%m-%d")
 
     connection = get_db()
 
@@ -299,11 +342,30 @@ def find_room():
                 and user["faculty_status"] == "approved"
             )
 
-    rooms = connection.execute("""
-        SELECT id, name, room_type, capacity, floor
+
+    room_categories = connection.execute("""
+        SELECT DISTINCT room_type
         FROM rooms
-        ORDER BY id
+        WHERE room_type IS NOT NULL AND room_type != ''
+        ORDER BY room_type
     """).fetchall()
+
+    room_categories = [row["room_type"] for row in room_categories]
+
+    if selected_room_type:
+        rooms = connection.execute("""
+            SELECT id, name, room_type, capacity, floor
+            FROM rooms
+            WHERE room_type = ?
+            ORDER BY id
+        """, (selected_room_type,)).fetchall()
+    else:
+        rooms = connection.execute("""
+            SELECT id, name, room_type, capacity, floor
+            FROM rooms
+            ORDER BY id
+        """).fetchall()
+
 
     # No search submitted: show all rooms as before.
     if not selected_date or not selected_time or not selected_duration:
@@ -314,7 +376,10 @@ def find_room():
             selected_date=selected_date,
             selected_time=selected_time,
             selected_duration=selected_duration,
-            room_conflicts={}
+            room_categories=room_categories,
+            selected_room_type=selected_room_type,
+            room_conflicts={},
+            today=today
         )
 
     try:
@@ -338,7 +403,7 @@ def find_room():
     requested_end = requested_start + timedelta(hours=duration)
     day_name = requested_start.strftime("%A")
 
-    available_rooms = []
+    display_rooms = list(rooms)
     room_conflicts = {}
 
     for room in rooms:
@@ -408,29 +473,28 @@ def find_room():
                     room_available = False
                     break
 
-        if room_available and not student_conflict:
-            available_rooms.append(room)
-
-        elif (
-            is_approved_faculty
-            and room_available
-            and student_conflict
-        ):
-            # Faculty can see the room, with a conflict label.
-            available_rooms.append(room)
+        if not room_available:
             room_conflicts[room_id] = (
-                "Conflicts with a student booking — faculty priority"
+                "Unavailable during the selected time"
+            )
+
+        elif student_conflict and not is_approved_faculty:
+            room_conflicts[room_id] = (
+                "Booked by a student during the selected time"
             )
 
     connection.close()
 
     return render_template(
         "find_room.html",
-        rooms=available_rooms,
+        rooms=display_rooms,
         selected_date=selected_date,
         selected_time=selected_time,
         selected_duration=selected_duration,
-        room_conflicts=room_conflicts
+        room_categories=room_categories,
+        selected_room_type=selected_room_type,
+        room_conflicts=room_conflicts,
+        today=today
     )
 
 
@@ -533,6 +597,7 @@ def register():
 
         name = request.form["name"].strip()
         email = request.form["email"].strip().lower()
+        parent_email = request.form.get("parent_email", "").strip().lower()
         password = request.form["password"]
         confirm_password = request.form["confirm_password"]
         requested_role = request.form.get("requested_role", "student")
@@ -569,6 +634,7 @@ def register():
         session["registration_email"] = email
         session["registration_password"] = password
         session["registration_role"] = requested_role
+        session["registration_parent_email"] = parent_email
         session["registration_otp"] = otp
         session["registration_otp_created_at"] = otp_created_at
 
@@ -733,6 +799,7 @@ def verify_otp():
         password = session["registration_password"]
         password = generate_password_hash(password)
         requested_role = session["registration_role"]
+        parent_email = session.get("registration_parent_email", "")
 
         connection = get_db()
 
@@ -740,28 +807,30 @@ def verify_otp():
 
             connection.execute("""
                 INSERT INTO users
-                (name, email, password, role, faculty_status)
-                VALUES (?, ?, ?, ?, ?)
+                (name, email, password, role, faculty_status, parent_email)
+                VALUES (?, ?, ?, ?, ?, ?)
             """, (
                 name,
                 email,
                 password,
                 "student",
-                "pending"
+                "pending",
+                parent_email
             ))
 
         else:
 
             connection.execute("""
                 INSERT INTO users
-                (name, email, password, role, faculty_status)
-                VALUES (?, ?, ?, ?, ?)
+                (name, email, password, role, faculty_status, parent_email)
+                VALUES (?, ?, ?, ?, ?, ?)
             """, (
                 name,
                 email,
                 password,
                 "student",
-                "none"
+                "none",
+                parent_email
             ))
 
         connection.commit()
@@ -772,6 +841,7 @@ def verify_otp():
         session.pop("registration_email", None)
         session.pop("registration_password", None)
         session.pop("registration_role", None)
+        session.pop("registration_parent_email", None)
         session.pop("registration_otp", None)
         session.pop("registration_otp_created_at", None)
 
@@ -841,19 +911,19 @@ def book_room():
     if request.method == "POST":
 
         user_id = session["user_id"]
-        
+
 
         connection = get_db()
 
         logged_in_user = connection.execute("""
-            SELECT name, email, role, faculty_status
+            SELECT name, email, role, faculty_status, parent_phone
             FROM users
             WHERE id = ?
         """, (user_id,)).fetchone()
 
         connection.close()
 
-        
+
 
         if logged_in_user is None:
             flash("User account not found.", "error")
@@ -862,6 +932,39 @@ def book_room():
         name = logged_in_user["name"]
         email = logged_in_user["email"]
         user_role = logged_in_user["role"]
+
+        
+        # Student bookings require an assigned, approved faculty approver.
+        if logged_in_user["role"] == "student":
+            approver_id = room["approver_id"]
+
+            if not approver_id:
+                flash(
+                    "This room does not have an assigned approver yet. "
+                    "Please contact the administrator.",
+                    "error"
+                )
+                return redirect(url_for("find_room"))
+
+            approver_connection = get_db()
+            approver = approver_connection.execute("""
+                SELECT id, name, email
+                FROM users
+                WHERE id = ?
+                  AND role = 'faculty'
+                  AND faculty_status = 'approved'
+            """, (approver_id,)).fetchone()
+            approver_connection.close()
+
+            if approver is None:
+                flash(
+                    "This room's assigned approver is no longer an approved faculty member. "
+                    "Please contact the administrator.",
+                    "error"
+                )
+                return redirect(url_for("find_room"))
+
+
         # Verify faculty approval before granting priority.
         if (
             logged_in_user["role"] == "faculty"
@@ -870,27 +973,71 @@ def book_room():
             flash("Your faculty account is not approved yet.", "error")
             return redirect(url_for("find_room"))
 
-        booking_date = request.form["date"]
-        booking_time =request.form["time"]
-        duration_text = request.form["duration"]
-        people = request.form["people"]
-        purpose = request.form["purpose"]
+        
+        booking_date = request.form.get("date", "").strip()
+        booking_time = request.form.get("time", "").strip()
+        duration_text = request.form.get("duration", "").strip()
+        people_text = request.form.get("people", "").strip()
+        purpose = request.form.get("purpose", "").strip()
 
-        duration = int(duration_text.split()[0])
+        # Validate the booking date and time.
+        try:
+            requested_start = datetime.strptime(
+                f"{booking_date} {booking_time}",
+                "%Y-%m-%d %I:%M %p"
+            )
+        except ValueError:
+            flash("Please select a valid booking date and time.", "error")
+            return redirect(url_for("book_room", room_id=room_id))
 
+        # Prevent bookings in the past.
+        if requested_start < datetime.now():
+            flash("You cannot book a room for a past date or time.", "error")
+            return redirect(url_for("book_room", room_id=room_id))
+
+        # Validate duration.
+        try:
+            duration = int(duration_text.split()[0])
+        except (ValueError, IndexError):
+            flash("Please select a valid booking duration.", "error")
+            return redirect(url_for("book_room", room_id=room_id))
+
+        if duration not in (1, 2, 3, 4):
+            flash("Please select a duration between 1 and 4 hours.", "error")
+            return redirect(url_for("book_room", room_id=room_id))
+
+        # Validate number of people against the room's capacity.
+        try:
+            people = int(people_text)
+        except ValueError:
+            flash("Please enter a valid number of people.", "error")
+            return redirect(url_for("book_room", room_id=room_id))
+
+        if people < 1 or people > room["capacity"]:
+            flash(
+                f"This room can accommodate 1 to {room['capacity']} people.",
+                "error"
+            )
+            return redirect(url_for("book_room", room_id=room_id))
+
+        if not purpose:
+            flash("Please enter the purpose of your booking.", "error")
+            return redirect(url_for("book_room", room_id=room_id))
+
+        # Reopen the database connection for booking checks and saving.
         connection = get_db()
-
-        # continue...
 
         # Get existing bookings for this room and date
         # Get existing confirmed bookings for this room and date
+        
         existing_bookings = connection.execute("""
-            SELECT id, booking_time, duration, booker_role
+            SELECT id, booking_time, duration, booker_role, status
             FROM bookings
             WHERE room_id = ?
             AND booking_date = ?
-            AND LOWER(status) = 'confirmed'
+            AND LOWER(status) IN ('confirmed', 'pending')
         """, (room_id, booking_date)).fetchall()
+
         # Convert requested time into datetime
         requested_start = datetime.strptime(
             f"{booking_date} {booking_time}",
@@ -939,6 +1086,7 @@ def book_room():
         student_bookings_to_cancel = []
         cancelled_student_bookings = []
 
+        
         for booking in existing_bookings:
 
             existing_start = datetime.strptime(
@@ -950,23 +1098,22 @@ def book_room():
                 hours=booking["duration"]
             )
 
-            # Check whether the two bookings overlap.
             if requested_start < existing_end and requested_end > existing_start:
 
                 existing_role = booking["booker_role"]
+                existing_status = booking["status"].lower()
 
-                # Faculty priority applies only to approved faculty.
+                # Approved faculty can take priority over student bookings.
                 if (
                     user_role == "faculty"
                     and logged_in_user["role"] == "faculty"
                     and logged_in_user["faculty_status"] == "approved"
                     and existing_role == "student"
                 ):
-                    # Defer cancellation until the new booking is saved.
                     student_bookings_to_cancel.append(booking["id"])
                     continue
 
-                # Students cannot override faculty bookings.
+                # Students cannot overlap an existing faculty booking.
                 elif user_role == "student" and existing_role == "faculty":
                     connection.close()
                     flash(
@@ -975,17 +1122,27 @@ def book_room():
                     )
                     return redirect(url_for("find_room"))
 
-                # Other overlapping bookings remain blocked.
+                # All other overlapping bookings are blocked.
                 else:
                     connection.close()
                     flash(
-                        "This room is already booked for the selected time.",
+                        "This room already has a booking or pending request for the selected time.",
                         "error"
                     )
                     return redirect(url_for("find_room"))
 
 
-            # Save booking
+
+            
+        # Save booking
+        # Students must wait for approval; faculty bookings are confirmed.
+        if user_role == "student":
+            booking_status = "Pending"
+            booking_approver_id = room["approver_id"]
+        else:
+            booking_status = "Confirmed"
+            booking_approver_id = None
+
         connection.execute("""
             INSERT INTO bookings
             (
@@ -997,9 +1154,11 @@ def book_room():
                 duration,
                 people,
                 purpose,
-                booker_role
+                booker_role,
+                status,
+                approver_id
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
             room_id,
             name,
@@ -1009,8 +1168,11 @@ def book_room():
             duration,
             people,
             purpose,
-            user_role
+            user_role,
+            booking_status,
+            booking_approver_id
         ))
+
 
 
 
@@ -1043,6 +1205,39 @@ def book_room():
         connection.commit()
         connection.close()
 
+        
+        # Notify the assigned approver about a new student request.
+        if booking_status == "Pending":
+            try:
+                approval_link = url_for(
+                    "faculty_booking_requests",
+                    _external=True
+                )
+
+                send_email_via_brevo(
+                    approver["email"],
+                    "BookMySlot: Student Booking Request Needs Review",
+                    f"""Hello {approver['name']},
+
+A student has submitted a room booking request that requires your review.
+
+Student: {name}
+Room: {room['name']}
+Date: {booking_date}
+Time: {booking_time}
+Duration: {duration} hour(s)
+Purpose: {purpose}
+
+Please log in to BookMySlot to review this request:
+{approval_link}
+
+Regards,
+BookMySlot"""
+                )
+            except Exception as e:
+                print("APPROVER NOTIFICATION EMAIL ERROR:", e)
+
+
 
         # Notify students whose bookings were cancelled
         # because an approved faculty member received priority.
@@ -1050,30 +1245,32 @@ def book_room():
             try:
                 send_email_via_brevo(
                     student_booking["email"],
-                    "CampusSpace Booking Cancelled — Faculty Priority",
+                    "BookMySlot Booking Cancelled — Faculty Priority",
                     f"""Hello {student_booking['name']},
 
-Your CampusSpace room booking has been cancelled because an approved faculty booking takes priority for an overlapping time slot.
+Your BookMySlot room booking has been cancelled because an approved faculty booking takes priority for an overlapping time slot.
 
 Date: {student_booking['booking_date']}
 Time: {student_booking['booking_time']}
 
-Please visit CampusSpace to find another available room.
+Please visit BookMySlot to find another available room.
 
 Regards,
-CampusSpace
+BookMySlot
 """
                 )
             except Exception as e:
                 print("FACULTY PRIORITY EMAIL ERROR:", e)
 
+        
         return render_template(
             "booking_confirmation.html",
             name=name,
             room=room,
             booking_date=booking_date,
             booking_time=booking_time,
-            duration=duration
+            duration=duration,
+            booking_status=booking_status
         )
 
 
@@ -1187,6 +1384,315 @@ def admin():
         recent_bookings=recent_bookings,
         faculty_requests=faculty_requests
     )
+
+
+@app.route("/faculty/booking-requests")
+def faculty_booking_requests():
+
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    if session.get("user_role") != "faculty":
+        flash("Access denied. Faculty only.", "error")
+        return redirect(url_for("home"))
+
+    connection = get_db()
+
+    requests = connection.execute("""
+        SELECT
+            bookings.*,
+            rooms.name AS room_name
+        FROM bookings
+        JOIN rooms ON bookings.room_id = rooms.id
+        WHERE bookings.approver_id = ?
+          AND LOWER(bookings.status) = 'pending'
+        ORDER BY bookings.booking_date, bookings.booking_time
+    """, (session["user_id"],)).fetchall()
+
+    connection.close()
+
+    return render_template(
+        "faculty_booking_requests.html",
+        requests=requests
+    )
+
+
+@app.route("/faculty/reject-booking/<int:booking_id>", methods=["POST"])
+def reject_booking(booking_id):
+
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    if session.get("user_role") != "faculty":
+        flash("Access denied. Faculty only.", "error")
+        return redirect(url_for("home"))
+
+    connection = get_db()
+
+    faculty = connection.execute("""
+        SELECT id
+        FROM users
+        WHERE id = ?
+          AND role = 'faculty'
+          AND faculty_status = 'approved'
+    """, (session["user_id"],)).fetchone()
+
+    if faculty is None:
+        connection.close()
+        flash("Your faculty account is not approved.", "error")
+        return redirect(url_for("home"))
+
+    booking = connection.execute("""
+        SELECT bookings.id, bookings.name, bookings.email,
+               bookings.booking_date, bookings.booking_time,
+               rooms.name AS room_name
+        FROM bookings
+        JOIN rooms ON rooms.id = bookings.room_id
+        WHERE bookings.id = ?
+          AND bookings.approver_id = ?
+          AND LOWER(bookings.status) = 'pending'
+    """, (booking_id, session["user_id"])).fetchone()
+
+    if booking is None:
+        connection.close()
+        flash(
+            "This pending request was not found or is not assigned to you.",
+            "error"
+        )
+        return redirect(url_for("faculty_booking_requests"))
+
+    connection.execute("""
+        UPDATE bookings
+        SET status = 'Rejected',
+            approval_decided_at = ?
+        WHERE id = ?
+          AND approver_id = ?
+          AND LOWER(status) = 'pending'
+    """, (
+        datetime.now().isoformat(timespec="seconds"),
+        booking_id,
+        session["user_id"]
+    ))
+
+    connection.commit()
+    connection.close()
+
+    try:
+        send_email_via_brevo(
+            booking["email"],
+            "BookMySlot Booking Request Rejected",
+            f"""Hello {booking['name']},
+
+Your BookMySlot booking request has been rejected.
+
+Room: {booking['room_name']}
+Date: {booking['booking_date']}
+Time: {booking['booking_time']}
+
+Please visit BookMySlot to choose another available time or room.
+
+Regards,
+BookMySlot"""
+        )
+    except Exception as e:
+        print("BOOKING REJECTION EMAIL ERROR:", e)
+
+    flash("Booking request rejected.", "success")
+    return redirect(url_for("faculty_booking_requests"))
+
+
+@app.route("/faculty/approve-booking/<int:booking_id>", methods=["POST"])
+def approve_booking(booking_id):
+
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    if session.get("user_role") != "faculty":
+        flash("Access denied. Faculty only.", "error")
+        return redirect(url_for("home"))
+
+    connection = get_db()
+
+    faculty = connection.execute("""
+        SELECT id
+        FROM users
+        WHERE id = ?
+          AND role = 'faculty'
+          AND faculty_status = 'approved'
+    """, (session["user_id"],)).fetchone()
+
+    if faculty is None:
+        connection.close()
+        flash("Your faculty account is not approved.", "error")
+        return redirect(url_for("home"))
+
+    
+    booking = connection.execute("""
+        SELECT
+            bookings.*,
+            rooms.name AS room_name,
+            users.parent_email AS parent_email
+        FROM bookings
+        JOIN rooms ON rooms.id = bookings.room_id
+        JOIN users ON LOWER(users.email) = LOWER(bookings.email)
+        WHERE bookings.id = ?
+          AND bookings.approver_id = ?
+          AND LOWER(bookings.status) = 'pending'
+    """, (booking_id, session["user_id"])).fetchone()
+
+
+    if booking is None:
+        connection.close()
+        flash(
+            "This pending request was not found or is not assigned to you.",
+            "error"
+        )
+        return redirect(url_for("faculty_booking_requests"))
+
+    try:
+        requested_start = datetime.strptime(
+            f"{booking['booking_date']} {booking['booking_time']}",
+            "%Y-%m-%d %I:%M %p"
+        )
+    except ValueError:
+        connection.close()
+        flash("The booking has an invalid date or time.", "error")
+        return redirect(url_for("faculty_booking_requests"))
+
+    requested_end = requested_start + timedelta(hours=booking["duration"])
+
+    # Recheck the room timetable before confirming.
+    day_name = requested_start.strftime("%A")
+
+    lectures = connection.execute("""
+        SELECT start_time, end_time
+        FROM timetable
+        WHERE room_id = ?
+          AND day = ?
+    """, (booking["room_id"], day_name)).fetchall()
+
+    for lecture in lectures:
+        lecture_start = datetime.strptime(
+            f"{booking['booking_date']} {lecture['start_time']}",
+            "%Y-%m-%d %H:%M"
+        )
+        lecture_end = datetime.strptime(
+            f"{booking['booking_date']} {lecture['end_time']}",
+            "%Y-%m-%d %H:%M"
+        )
+
+        if requested_start < lecture_end and requested_end > lecture_start:
+            connection.close()
+            flash(
+                "This request conflicts with a scheduled lecture and cannot be approved.",
+                "error"
+            )
+            return redirect(url_for("faculty_booking_requests"))
+
+    # Recheck confirmed bookings in case the slot was taken meanwhile.
+    existing_bookings = connection.execute("""
+        SELECT id, booking_time, duration, booker_role
+        FROM bookings
+        WHERE room_id = ?
+          AND booking_date = ?
+          AND LOWER(status) = 'confirmed'
+          AND id != ?
+    """, (
+        booking["room_id"],
+        booking["booking_date"],
+        booking_id
+    )).fetchall()
+
+    for existing in existing_bookings:
+        existing_start = datetime.strptime(
+            f"{booking['booking_date']} {existing['booking_time']}",
+            "%Y-%m-%d %I:%M %p"
+        )
+        existing_end = existing_start + timedelta(hours=existing["duration"])
+
+        if requested_start < existing_end and requested_end > existing_start:
+            connection.close()
+            flash(
+                "This request now conflicts with a confirmed booking and cannot be approved.",
+                "error"
+            )
+            return redirect(url_for("faculty_booking_requests"))
+
+    # Confirm only if the request is still pending and assigned to this faculty member.
+    cursor = connection.execute("""
+        UPDATE bookings
+        SET status = 'Confirmed',
+            approval_decided_at = ?
+        WHERE id = ?
+          AND approver_id = ?
+          AND LOWER(status) = 'pending'
+    """, (
+        datetime.now().isoformat(timespec="seconds"),
+        booking_id,
+        session["user_id"]
+    ))
+
+    if cursor.rowcount != 1:
+        connection.close()
+        flash(
+            "This request has already been processed. Please refresh the page.",
+            "error"
+        )
+        return redirect(url_for("faculty_booking_requests"))
+
+    connection.commit()
+    connection.close()
+
+    try:
+        send_email_via_brevo(
+            booking["email"],
+            "BookMySlot Booking Approved",
+            f"""Hello {booking['name']},
+
+Your BookMySlot booking request has been approved!
+
+Room: {booking['room_name']}
+Date: {booking['booking_date']}
+Time: {booking['booking_time']}
+Duration: {booking['duration']} hour(s)
+
+Regards,
+BookMySlot"""
+        )
+    except Exception as e:
+        print("BOOKING APPROVAL EMAIL ERROR:", e)
+
+    
+    # Notify the parent/guardian only after the booking is approved.
+    parent_email = (booking["parent_email"] or "").strip()
+
+    if parent_email:
+        try:
+            send_email_via_brevo(
+                parent_email,
+                "BookMySlot: Your Child's Booking Has Been Approved",
+                f"""Hello Parent/Guardian,
+
+This is to inform you that your child's room booking has been approved.
+
+Student: {booking['name']}
+Room: {booking['room_name']}
+Date: {booking['booking_date']}
+Time: {booking['booking_time']}
+Duration: {booking['duration']} hour(s)
+
+Regards,
+BookMySlot"""
+            )
+        except Exception as e:
+            print("PARENT APPROVAL EMAIL ERROR:", e)
+    else:
+        print("PARENT APPROVAL EMAIL SKIPPED: No parent email registered.")
+
+
+    flash("Booking approved successfully.", "success")
+    return redirect(url_for("faculty_booking_requests"))
+
 
 @app.route("/admin/invite-admin", methods=["GET", "POST"])
 def invite_admin():
@@ -1565,6 +2071,7 @@ def edit_timetable(lecture_id):
         rooms=rooms
     )
 
+
 @app.route("/add-room", methods=["GET", "POST"])
 def add_room():
 
@@ -1575,30 +2082,54 @@ def add_room():
         flash("Access denied. Admin only.", "error")
         return redirect(url_for("home"))
 
+    connection = get_db()
+
     if request.method == "POST":
 
         name = request.form["name"].strip()
         room_type = request.form["room_type"].strip()
         capacity = request.form["capacity"].strip()
+        floor = request.form["floor"].strip()
+        approver_id = request.form.get("approver_id", "").strip()
 
         if not capacity.isdigit() or int(capacity) <= 0:
+            connection.close()
             flash("Capacity must be a positive number.", "error")
             return redirect(url_for("add_room"))
 
         capacity = int(capacity)
-        floor = request.form["floor"].strip()
 
-        connection = get_db()
+        if approver_id and not approver_id.isdigit():
+            connection.close()
+            flash("Please select a valid booking approver.", "error")
+            return redirect(url_for("add_room"))
+
+        approver_id = int(approver_id) if approver_id else None
+
+        if approver_id is not None:
+            approved_faculty = connection.execute("""
+                SELECT id
+                FROM users
+                WHERE id = ?
+                  AND role = 'faculty'
+                  AND faculty_status = 'approved'
+            """, (approver_id,)).fetchone()
+
+            if approved_faculty is None:
+                connection.close()
+                flash("Please select an approved faculty member.", "error")
+                return redirect(url_for("add_room"))
 
         connection.execute("""
             INSERT INTO rooms
-            (name, room_type, capacity, floor)
-            VALUES (?, ?, ?, ?)
+            (name, room_type, capacity, floor, approver_id)
+            VALUES (?, ?, ?, ?, ?)
         """, (
             name,
             room_type,
             capacity,
-            floor
+            floor,
+            approver_id
         ))
 
         connection.commit()
@@ -1606,7 +2137,21 @@ def add_room():
 
         return redirect(url_for("admin"))
 
-    return render_template("add_room.html")
+    approved_faculty = connection.execute("""
+        SELECT id, name, email
+        FROM users
+        WHERE role = 'faculty'
+          AND faculty_status = 'approved'
+        ORDER BY name
+    """).fetchall()
+
+    connection.close()
+
+    return render_template(
+        "add_room.html",
+        approved_faculty=approved_faculty
+    )
+
 
 @app.route("/edit-room/<int:room_id>", methods=["GET", "POST"])
 def edit_room(room_id):
@@ -1641,35 +2186,59 @@ def edit_room(room_id):
             flash("Capacity must be a positive number.", "error")
             return redirect(url_for("edit_room", room_id=room_id))
 
+        
         capacity = int(capacity)
         floor = request.form["floor"].strip()
+        approver_id = request.form.get("approver_id", "").strip()
 
+        if approver_id and not approver_id.isdigit():
+            flash("Please select a valid booking approver.", "error")
+            return redirect(url_for("edit_room", room_id=room_id))
+
+        approver_id = int(approver_id) if approver_id else None
+
+
+        
         connection.execute("""
             UPDATE rooms
             SET name = ?,
                 room_type = ?,
                 capacity = ?,
-                floor = ?
+                floor = ?,
+                approver_id = ?
             WHERE id = ?
         """, (
             name,
             room_type,
             capacity,
             floor,
+            approver_id,
             room_id
         ))
+
 
         connection.commit()
         connection.close()
 
         return redirect(url_for("admin"))
 
+    
+    approved_faculty = connection.execute("""
+        SELECT id, name, email
+        FROM users
+        WHERE role = 'faculty'
+          AND faculty_status = 'approved'
+        ORDER BY name
+    """).fetchall()
+
     connection.close()
 
     return render_template(
         "edit_room.html",
-        room=room
+        room=room,
+        approved_faculty=approved_faculty
     )
+
 
 @app.route("/delete-room/<int:room_id>", methods=["POST"])
 def delete_room(room_id):

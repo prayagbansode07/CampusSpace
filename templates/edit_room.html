@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Edit Room | CampusSpace</title>
+    <title>Edit Room | BookMySlot</title>
 
     <style>
 
@@ -217,7 +217,7 @@
 <nav>
 
     <a href="/admin" class="logo">
-        CampusSpace
+        BookMySlot
     </a>
 
     <a href="/admin" class="back">
@@ -335,6 +335,31 @@
                     required>
 
             </div>
+
+            
+            <div class="form-group">
+                <label for="approver_id">
+                    Assigned Faculty / Lab In-Charge
+                </label>
+
+                <select id="approver_id" name="approver_id">
+                    <option value="">-- Select an approver --</option>
+
+                    {% for faculty in approved_faculty %}
+                        <option
+                            value="{{ faculty['id'] }}"
+                            {% if room['approver_id'] and room['approver_id'] == faculty['id'] %}selected{% endif %}>
+                            {{ faculty['name'] }} ({{ faculty['email'] }})
+                        </option>
+                    {% endfor %}
+                </select>
+
+                <p style="margin-top: 8px; color: #667085; font-size: 13px; line-height: 1.5;">
+                    Assign an approved faculty member to classrooms and seminar halls.
+                    For computer laboratories, select the lab in-charge.
+                </p>
+            </div>
+
 
 
             <div class="buttons">

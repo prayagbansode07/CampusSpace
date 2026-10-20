@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Booking Confirmed | CampusSpace</title>
+    <title>Booking Request | BookMySlot</title>
 
     <style>
         * {
@@ -144,14 +144,27 @@
 <body>
     <main class="confirmation-card">
 
+        
         <div class="success-icon">&#10003;</div>
 
-        <h1>Booking Confirmed!</h1>
+        {% if booking_status == "Pending" %}
+            <h1 style="color: #b7791f;">Request Submitted!</h1>
 
-        <p class="subtitle">
-            Thank you, <strong>{{ name }}</strong>!
-            Your room booking has been successfully submitted.
-        </p>
+            <p class="subtitle">
+                Thank you, <strong>{{ name }}</strong>!
+                Your booking request has been submitted successfully and is
+                awaiting approval from the assigned faculty member.
+                You will be notified when a decision is made.
+            </p>
+        {% else %}
+            <h1>Booking Confirmed!</h1>
+
+            <p class="subtitle">
+                Thank you, <strong>{{ name }}</strong>!
+                Your room booking has been confirmed successfully.
+            </p>
+        {% endif %}
+
 
         <section class="booking-details">
             <div class="detail-row">
@@ -183,7 +196,7 @@
 
             <a href="{{ url_for('home') }}"
                class="button secondary-button">
-                Back to CampusSpace
+                Back to BookMySlot
             </a>
         </div>
 

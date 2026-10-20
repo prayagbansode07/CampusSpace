@@ -8,7 +8,7 @@
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0">
 
-    <title>Register - CampusSpace</title>
+    <title>Register - BookMySlot</title>
 
     <style>
 
@@ -224,7 +224,7 @@
 <nav>
 
     <a href="/">
-        CampusSpace
+        BookMySlot
     </a>
 
 </nav>
@@ -239,7 +239,7 @@
         </h1>
 
         <p class="subtitle">
-            Register for CampusSpace
+            Register for BookMySlot
         </p>
         <div class="flash-container">
             {% with messages = get_flashed_messages(with_categories=true) %}
@@ -378,11 +378,26 @@
             </div>
 
 
+            
+            <!-- PARENT PHONE -->
+
+            
+            <label for="parent_email">Parent/Guardian Email Address</label>
+            <input
+                type="email"
+                id="parent_email"
+                name="parent_email"
+                placeholder="Enter parent/guardian email address"
+                required>
+
+        
+
             <!-- REGISTER -->
 
             <button type="submit">
                 Register
             </button>
+
 
 
         </form>

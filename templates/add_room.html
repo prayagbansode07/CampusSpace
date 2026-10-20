@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Add Room | CampusSpace</title>
+    <title>Add Room | BookMySlot</title>
 
     <style>
 
@@ -221,7 +221,7 @@
 <nav>
 
     <a href="/admin" class="logo">
-        CampusSpace
+        BookMySlot
     </a>
 
     <a href="/admin" class="back">
@@ -337,6 +337,34 @@
                     required>
 
             </div>
+
+            
+            <div class="form-group">
+
+                <label for="approver_id">
+                    Assigned Faculty / Lab In-Charge
+                </label>
+
+                <select id="approver_id" name="approver_id">
+
+                    <option value="">
+                        -- Select an approver --
+                    </option>
+
+                    {% for faculty in approved_faculty %}
+                        <option value="{{ faculty['id'] }}">
+                            {{ faculty['name'] }} ({{ faculty['email'] }})
+                        </option>
+                    {% endfor %}
+
+                </select>
+
+                <p style="color: #667085; font-size: 13px; line-height: 1.5; margin-top: 8px;">
+                    Assign the responsible faculty member for classrooms and seminar halls, or the lab in-charge for computer laboratories.
+                </p>
+
+            </div>
+
 
 
             <div class="buttons">
