@@ -169,21 +169,7 @@ def init_db():
         )
     """)
 
-    # Add some initial rooms
-    rooms = [
-        ("Room A-101", "Classroom", 40, "1st Floor"),
-        ("Lab B-204", "Computer Laboratory", 35, "2nd Floor"),
-        ("Meeting Room C-302", "Meeting Room", 15, "3rd Floor"),
-    ]
 
-    for room in rooms:
-        try:
-            connection.execute("""
-                INSERT INTO rooms (name, room_type, capacity, floor)
-                VALUES (?, ?, ?, ?)
-            """, room)
-        except sqlite3.IntegrityError:
-            pass
 
     connection.execute("""
         CREATE TABLE IF NOT EXISTS timetable (
