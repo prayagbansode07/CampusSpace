@@ -1375,59 +1375,10 @@
             </div>
 
             <div class="home-room-grid">
-                {% for room in rooms %}
-                <article class="home-room-card">
-                    <div class="home-room-card-top">
-                        <div class="home-room-icon" aria-hidden="true">▦</div>
-                        <span class="home-room-status">Available</span>
-                    </div>
-
-                    <h3>{{ room["name"] }}</h3>
-                    <p class="home-room-card-type">{{ room["room_type"] }}</p>
-
-                    <div class="home-room-details">
-                        <div>
-                            <span class="home-room-detail-label">Capacity</span>
-                            <span class="home-room-detail-value">
-                                {{ room["capacity"] }} people
-                            </span>
-                        </div>
-                        <div>
-                            <span class="home-room-detail-label">Floor</span>
-                            <span class="home-room-detail-value">
-                                {{ room["floor"] }}
-                            </span>
-                        </div>
-                    </div>
-
-                    <a href="/book-room?room_id={{ room['id'] }}"
-                       class="home-room-book">
-                        Book Room <span aria-hidden="true">&nbsp;→</span>
-                    </a>
-                </article>
-                {% else %}
-                <div class="home-room-empty">
-                    <h3>No rooms available yet</h3>
-                    <p>Rooms added by the administrator will appear here.</p>
-                </div>
-                {% endfor %}
+                
             </div>
 
-
-                <a class="category-card" href="/find-room?room_type=Meeting%20Room">
-                    <img
-                        src="{{ url_for('static', filename='images/vit-seminar-hall.jpg') }}"
-                        alt="Seminar hall with presentation seating"
-                        loading="lazy">
-
-                    <div class="category-card-content">
-                        <span class="category-label">PRESENTATIONS</span>
-                        <h3>Seminar Halls</h3>
-                        <p>For seminars, guest lectures, workshops, and academic presentations.</p>
-                        <span class="category-link">Explore seminar halls →</span>
-                    </div>
-                </a>
-
+            
             </div>
 
         </section>
