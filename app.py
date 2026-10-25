@@ -12,7 +12,7 @@ from email.message import EmailMessage
 
 app = Flask(__name__)
 app.secret_key = os.environ.get(
-    "CAMPUSSPACE_SECRET_KEY",
+    "BOOKMYSLOT_SECRET_KEY",
     "temporary-development-key"
 )
 DATABASE = "campusspace.db"
@@ -86,16 +86,16 @@ def send_admin_invitation_email(receiver_email, token):
     sender_email = os.environ.get("CAMPUSSPACE_EMAIL")
 
     invitation_link = (
-        "https://campusspace-gota.onrender.com/accept-admin-invitation/"
+        "https://bookmyslot-v3lb.onrender.com/accept-admin-invitation/"
         + token
     )
 
-    subject = "CampusSpace Admin Invitation"
+    subject = "BookMySlot Admin Invitation"
 
     body = f"""
 Hello,
 
-You have been invited to become an administrator of CampusSpace.
+You have been invited to become an administrator of BookMySlot.
 
 Accept the invitation using this link:
 
@@ -104,7 +104,7 @@ Accept the invitation using this link:
 This invitation is valid for 24 hours.
 
 Regards,
-CampusSpace
+BookMySlot
 """
 
     send_email_via_resend(receiver_email, subject, body)
@@ -158,22 +158,6 @@ def init_db():
             created_at TEXT DEFAULT CURRENT_TIMESTAMP
         )
     """)
-
-    # Add some initial rooms
-    rooms = [
-        ("Room A-101", "Classroom", 40, "1st Floor"),
-        ("Lab B-204", "Computer Laboratory", 35, "2nd Floor"),
-        ("Meeting Room C-302", "Meeting Room", 15, "3rd Floor"),
-    ]
-
-    for room in rooms:
-        try:
-            connection.execute("""
-                INSERT INTO rooms (name, room_type, capacity, floor)
-                VALUES (?, ?, ?, ?)
-            """, room)
-        except sqlite3.IntegrityError:
-            pass
 
     connection.execute("""
         CREATE TABLE IF NOT EXISTS timetable (
@@ -229,9 +213,20 @@ def init_db():
 # HOME
 # -----------------------------
 
+
 @app.route("/")
 def home():
-    return render_template("index.html")
+    connection = get_db()
+
+    rooms = connection.execute("""
+        SELECT id, name, room_type, capacity, floor
+        FROM rooms
+        ORDER BY id
+    """).fetchall()
+
+    connection.close()
+
+    return render_template("index.html", rooms=rooms)
 
 # -----------------------------
 # HELP & SUPPORT
@@ -1309,25 +1304,23 @@ def accept_admin_invitation(token):
         """, (invitation["email"],)).fetchone()
 
         if existing_user:
-            connection.execute("""
-                UPDATE users
-                SET name = ?, password = ?, role = 'admin'
-                WHERE email = ?
-            """, (
-                name,
-                hashed_password,
-                invitation["email"]
-            ))
-        else:
-            connection.execute("""
-                INSERT INTO users
-                (name, email, password, role, faculty_status)
-                VALUES (?, ?, ?, 'admin', 'approved')
-            """, (
-                name,
-                invitation["email"],
-                hashed_password
-            ))
+            connection.close()
+            flash(
+                "An account with this email already exists. "
+                "Use a different email for the admin invitation.",
+                "error"
+            )
+            return redirect(url_for("home"))
+
+        connection.execute("""
+            INSERT INTO users
+            (name, email, password, role, faculty_status)
+            VALUES (?, ?, ?, 'admin', 'approved')
+        """, (
+            name,
+            invitation["email"],
+            hashed_password
+        ))
 
         connection.execute("""
             UPDATE admin_invitations
