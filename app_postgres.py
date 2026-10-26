@@ -9,6 +9,7 @@ import psycopg
 from datetime import datetime, timedelta
 import secrets
 import smtplib
+from email.mime.text import MIMEText
 from email.message import EmailMessage
 
 app = Flask(__name__)
@@ -91,37 +92,23 @@ def get_db():
     return connection
 
 def send_email_via_resend(receiver_email, subject, body):
-    api_key = os.environ.get("RESEND_API_KEY")
+    smtp_login = os.environ.get("SMTP_LOGIN")
+    smtp_key = os.environ.get("SMTP_KEY")
+    sender_email = os.environ.get("CAMPUSSPACE_EMAIL") or smtp_login
 
-    if not api_key:
-        raise Exception("RESEND_API_KEY is not configured.")
+    if not smtp_login or not smtp_key or not sender_email:
+        raise Exception("Brevo SMTP environment variables are not configured.")
 
-    email_data = {
-        "from": "CampusSpace <onboarding@resend.dev>",
-        "to": [receiver_email],
-        "subject": subject,
-        "text": body
-    }
+    message = MIMEText(body, "plain", "utf-8")
+    message["Subject"] = subject
+    message["From"] = sender_email
+    message["To"] = receiver_email
 
-    request = Request(
-        "https://api.resend.com/emails",
-        data=json.dumps(email_data).encode("utf-8"),
-        headers={
-            "Authorization": f"Bearer {api_key}",
-            "Content-Type": "application/json",
-            "User-Agent": "CampusSpace/1.0"
-        },
-        method="POST"
-    )
+    with smtplib.SMTP("smtp-relay.brevo.com", 587, timeout=20) as server:
+        server.starttls()
+        server.login(smtp_login, smtp_key)
+        server.send_message(message)
 
-    try:
-        with urlopen(request, timeout=20) as response:
-            response.read()
-
-    except HTTPError as error:
-        error_body = error.read().decode("utf-8")
-        print("RESEND ERROR:", error_body)
-        raise
 
 def send_otp_email(receiver_email, otp):
 
