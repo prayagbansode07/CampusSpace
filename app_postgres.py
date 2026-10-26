@@ -900,8 +900,20 @@ def book_room():
         booking_date = request.form["date"]
         booking_time =request.form["time"]
         duration_text = request.form["duration"]
-        people = request.form["people"]
+        people_text = request.form.get("people", "").strip()
         purpose = request.form["purpose"]
+
+        if not people_text.isdigit() or int(people_text) < 1:
+            flash("Number of people must be at least 1.", "error")
+            return redirect(url_for("book_room", room_id=room_id))
+
+        people = int(people_text)
+        if people > int(room["capacity"]):
+            flash(
+                f"This room's capacity is {room['capacity']} people.",
+                "error"
+            )
+            return redirect(url_for("book_room", room_id=room_id))
 
         duration = int(duration_text.split()[0])
 
