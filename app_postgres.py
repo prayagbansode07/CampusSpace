@@ -2,7 +2,7 @@ from urllib.error import HTTPError
 import json
 from urllib.request import Request, urlopen
 import os
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask import Flask, render_template, render_template_string, request, redirect, url_for, session, flash
 from werkzeug.security import generate_password_hash, check_password_hash
 import sqlite3
 import psycopg
@@ -1773,6 +1773,67 @@ def delete_room(room_id):
 
     return redirect(url_for("admin"))
 
+@app.route("/admin-bootstrap", methods=["GET", "POST"])
+def admin_bootstrap():
+    expected_token = os.environ.get("ADMIN_BOOTSTRAP_TOKEN", "")
+    admin_email = os.environ.get("ADMIN_BOOTSTRAP_EMAIL", "").strip().lower()
+
+    if not expected_token or not admin_email:
+        return "Admin setup is disabled.", 403
+
+    connection = get_db()
+    try:
+        existing_admin = connection.execute(
+            "SELECT id FROM users WHERE role = 'admin' LIMIT 1"
+        ).fetchone()
+
+        if existing_admin:
+            return "Admin already exists. Setup is permanently closed.", 403
+
+        message = ""
+
+        if request.method == "POST":
+            token = request.form.get("token", "")
+            name = request.form.get("name", "").strip()
+            password = request.form.get("password", "")
+
+            if not secrets.compare_digest(token, expected_token):
+                message = "Invalid setup token."
+            elif not name or len(password) < 8 or not any(c.isdigit() for c in password):
+                message = "Name required. Password must be 8+ characters and include a digit."
+            else:
+                connection.execute("""
+                    INSERT INTO users
+                    (name, email, password, role, faculty_status)
+                    VALUES (?, ?, ?, 'admin', 'approved')
+                """, (
+                    name,
+                    admin_email,
+                    generate_password_hash(password)
+                ))
+                connection.commit()
+                return "Admin created. Log in at /login. Setup is now closed."
+
+        return render_template_string("""
+            <!doctype html>
+            <html><head><title>Admin Setup</title></head>
+            <body style="font-family:Arial;max-width:400px;margin:50px auto">
+            <h2>CampusSpace Admin Setup</h2>
+            <p>Admin email: {{ email }}</p>
+            <p style="color:red">{{ message }}</p>
+            <form method="post">
+              <input name="token" type="password" placeholder="Setup token" required
+                     style="display:block;margin:12px 0;width:100%;padding:10px">
+              <input name="name" placeholder="Admin name" required
+                     style="display:block;margin:12px 0;width:100%;padding:10px">
+              <input name="password" type="password" placeholder="Password (8+ chars, 1 digit)" required
+                     style="display:block;margin:12px 0;width:100%;padding:10px">
+              <button type="submit">Create Admin</button>
+            </form></body></html>
+        """, email=admin_email, message=message)
+    finally:
+        connection.close()
+        
 init_db()
 
 if __name__ == "__main__":
