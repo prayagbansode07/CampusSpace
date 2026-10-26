@@ -1794,25 +1794,45 @@ def admin_bootstrap():
 
         if request.method == "POST":
             token = request.form.get("token", "")
-            name = request.form.get("name", "").strip()
-            password = request.form.get("password", "")
 
             if not secrets.compare_digest(token, expected_token):
                 message = "Invalid setup token."
-            elif not name or len(password) < 8 or not any(c.isdigit() for c in password):
-                message = "Name required. Password must be 8+ characters and include a digit."
             else:
-                connection.execute("""
-                    INSERT INTO users
-                    (name, email, password, role, faculty_status)
-                    VALUES (?, ?, ?, 'admin', 'approved')
-                """, (
-                    name,
-                    admin_email,
-                    generate_password_hash(password)
-                ))
-                connection.commit()
-                return "Admin created. Log in at /login. Setup is now closed."
+                existing_user = connection.execute(
+                    "SELECT id FROM users WHERE email = ?",
+                    (admin_email,)
+                ).fetchone()
+
+                if existing_user:
+                    connection.execute("""
+                        UPDATE users
+                        SET role = 'admin', faculty_status = 'approved'
+                        WHERE email = ?
+                    """, (admin_email,))
+                    connection.commit()
+                    return (
+                        "Existing account promoted to admin. "
+                        "Log in at /login using your existing password. "
+                        "Setup is now closed."
+                    )
+                else:
+                    name = request.form.get("name", "").strip()
+                    password = request.form.get("password", "")
+
+                    if not name or len(password) < 8 or not any(c.isdigit() for c in password):
+                        message = "Name required. Password must be 8+ characters and include a digit."
+                    else:
+                        connection.execute("""
+                            INSERT INTO users
+                            (name, email, password, role, faculty_status)
+                            VALUES (?, ?, ?, 'admin', 'approved')
+                        """, (
+                            name,
+                            admin_email,
+                            generate_password_hash(password)
+                        ))
+                        connection.commit()
+                        return "Admin created. Log in at /login. Setup is now closed."
 
         return render_template_string("""
             <!doctype html>
