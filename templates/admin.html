@@ -326,118 +326,135 @@
 
 <body>
 
-<nav>
+    <nav>
 
-    <a href="/" class="logo">
-        CampusSpace
-    </a>
-
-    <div>
-
-        <span class="admin-label">
-            Administrator
-        </span>
-
-        <a href="/logout" class="logout">
-            Logout
+        <a href="/" class="logo">
+            CampusSpace
         </a>
 
-    </div>
+        <div>
 
-</nav>
+            <span class="admin-label">
+                Administrator
+            </span>
 
-<main>
+            <a href="/logout" class="logout">
+                Logout
+            </a>
 
-    <div class="page-title">
+        </div>
 
-        <p>
-            CAMPUSSPACE ADMINISTRATION
-        </p>
+    </nav>
 
-        <h1>
-            Admin Dashboard
-        </h1>
+    <main>
 
-        <span>
-            Manage campus rooms and monitor bookings.
-        </span>
+        <div class="page-title">
 
-    </div>
+            <p>
+                CAMPUSSPACE ADMINISTRATION
+            </p>
 
-    <!-- STATISTICS -->
+            <h1>
+                Admin Dashboard
+            </h1>
 
-    <div class="stats">
+            <span>
+                Manage campus rooms and monitor bookings.
+            </span>
 
-        <div class="stat-card">
+        </div>
 
-            <div class="stat-label">
-                Total Rooms
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div style="
+                    margin-bottom: 16px;
+                    padding: 12px 16px;
+                    border-radius: 8px;
+                    background: {{ '#dcfce7' if category == 'success' else '#fee2e2' }};
+                    color: {{ '#166534' if category == 'success' else '#991b1b' }};
+                    border: 1px solid {{ '#86efac' if category == 'success' else '#fecaca' }};
+                ">
+            {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        <!-- STATISTICS -->
+
+        <div class="stats">
+
+            <div class="stat-card">
+
+                <div class="stat-label">
+                    Total Rooms
+                </div>
+
+                <div class="stat-number">
+                    {{ total_rooms }}
+                </div>
+
             </div>
 
-            <div class="stat-number">
-                {{ total_rooms }}
+            <div class="stat-card">
+
+                <div class="stat-label">
+                    Today's Bookings
+                </div>
+
+                <div class="stat-number">
+                    {{ today_bookings }}
+                </div>
+
+            </div>
+
+            <div class="stat-card">
+
+                <div class="stat-label">
+                    Registered Users
+                </div>
+
+                <div class="stat-number">
+                    {{ total_users }}
+                </div>
+
             </div>
 
         </div>
 
-        <div class="stat-card">
-
-            <div class="stat-label">
-                Today's Bookings
-            </div>
-
-            <div class="stat-number">
-                {{ today_bookings }}
-            </div>
-
         </div>
 
-        <div class="stat-card">
+        <!-- FACULTY APPROVAL REQUESTS -->
 
-            <div class="stat-label">
-                Registered Users
+        <section class="section">
+
+            <div class="section-header">
+
+                <h2>
+                    Faculty Approval Requests
+                </h2>
+
             </div>
 
-            <div class="stat-number">
-                {{ total_users }}
-            </div>
+            <div style="overflow-x:auto;">
 
-        </div>
+                <table>
 
-    </div>
+                    <thead>
 
-    </div>
+                        <tr>
+                            <th>NAME</th>
+                            <th>EMAIL</th>
+                            <th>STATUS</th>
+                            <th>ACTION</th>
+                        </tr>
 
-    <!-- FACULTY APPROVAL REQUESTS -->
+                    </thead>
 
-    <section class="section">
+                    <tbody>
 
-        <div class="section-header">
-
-            <h2>
-                Faculty Approval Requests
-            </h2>
-
-        </div>
-
-        <div style="overflow-x:auto;">
-
-            <table>
-
-                <thead>
-
-                    <tr>
-                        <th>NAME</th>
-                        <th>EMAIL</th>
-                        <th>STATUS</th>
-                        <th>ACTION</th>
-                    </tr>
-
-                </thead>
-
-                <tbody>
-
-                    {% if faculty_requests %}
+                        {% if faculty_requests %}
 
                         {% for faculty in faculty_requests %}
 
@@ -462,9 +479,7 @@
 
                             <td>
 
-                                <a
-                                    href="/admin/approve-faculty/{{ faculty['id'] }}"
-                                    style="
+                                <a href="/admin/approve-faculty/{{ faculty['id'] }}" style="
                                         display:inline-block;
                                         background:#18864b;
                                         color:white;
@@ -474,14 +489,11 @@
                                         font-size:13px;
                                         font-weight:600;
                                         margin-right:6px;
-                                    "
-                                >
+                                    ">
                                     Approve
                                 </a>
 
-                                <a
-                                    href="/admin/reject-faculty/{{ faculty['id'] }}"
-                                    style="
+                                <a href="/admin/reject-faculty/{{ faculty['id'] }}" style="
                                         display:inline-block;
                                         background:#dc2626;
                                         color:white;
@@ -490,8 +502,7 @@
                                         text-decoration:none;
                                         font-size:13px;
                                         font-weight:600;
-                                    "
-                                >
+                                    ">
                                     Reject
                                 </a>
 
@@ -501,53 +512,49 @@
 
                         {% endfor %}
 
-                    {% else %}
+                        {% else %}
 
                         <tr>
 
-                            <td
-                                colspan="4"
-                                style="
+                            <td colspan="4" style="
                                     text-align:center;
                                     color:#667085;
                                     padding:30px;
-                                "
-                            >
+                                ">
                                 No pending faculty requests.
                             </td>
 
                         </tr>
 
-                    {% endif %}
+                        {% endif %}
 
-                </tbody>
+                    </tbody>
 
-            </table>
+                </table>
 
-        </div>
+            </div>
 
-    </section>
+        </section>
 
-    <!-- ROOMS -->
+        <!-- ROOMS -->
 
-    <section class="section">
+        <section class="section">
 
-        <div class="section-header">
+            <div class="section-header">
 
-            <h2>
-                Campus Rooms
-            </h2>
+                <h2>
+                    Campus Rooms
+                </h2>
 
-            <a href="/add-room" class="add-button">
-                + Add Room
-            </a>
+                <a href="/add-room" class="add-button">
+                    + Add Room
+                </a>
 
-            <a href="/admin/invite-admin" class="add-button">
-                Invite New Admin
-            </a>
+                <a href="/admin/invite-admin" class="add-button">
+                    Invite New Admin
+                </a>
 
-            <a href="/admin/timetable"
-                style="
+                <a href="/admin/timetable" style="
                     display:inline-block;
                     background:#2563eb;
                     color:white;
@@ -557,102 +564,10 @@
                     font-weight:bold;
                     margin-right:8px;
                 ">
-                Manage Timetable
-            </a>
+                    Manage Timetable
+                </a>
 
-        </div>
-
-        <table>
-
-            <thead>
-
-                <tr>
-
-                    <th>ROOM</th>
-                    <th>TYPE</th>
-                    <th>CAPACITY</th>
-                    <th>LOCATION</th>
-                    <th>STATUS</th>
-                    <th>ACTION</th>
-
-                </tr>
-
-            </thead>
-
-            <tbody>
-
-                {% for room in rooms %}
-
-                <tr>
-
-                    <td class="room-name">
-                        {{ room["name"] }}
-                    </td>
-
-                    <td>
-                        {{ room["room_type"] }}
-                    </td>
-
-                    <td>
-                        {{ room["capacity"] }}
-                    </td>
-
-                    <td>
-                        {{ room["floor"] }}
-                    </td>
-
-                    <td class="available">
-                        Available
-                    </td>
-
-                    <td>
-
-                        <a href="/edit-room/{{ room['id'] }}" class="action">
-                            Edit
-                        </a>
-
-                        <form
-                            method="POST"
-                            action="/delete-room/{{ room['id'] }}"
-                            style="display:inline;"
-                            onsubmit="return confirmDelete();">
-
-                            <button
-                                type="submit"
-                                class="action"
-                                style="border:none; background:none; padding:0; cursor:pointer;">
-
-                                Delete
-
-                            </button>
-
-                        </form>
-
-                    </td>
-
-                </tr>
-
-                {% endfor %}
-
-            </tbody>
-
-        </table>
-
-    </section>
-
-    <!-- RECENT BOOKINGS -->
-
-    <section class="section">
-
-        <div class="section-header">
-
-            <h2>
-                Recent Bookings
-            </h2>
-
-        </div>
-
-        <div style="overflow-x:auto;">
+            </div>
 
             <table>
 
@@ -661,14 +576,11 @@
                     <tr>
 
                         <th>ROOM</th>
-                        <th>CUSTOMER</th>
-                        <th>EMAIL</th>
-                        <th>DATE</th>
-                        <th>TIME</th>
-                        <th>DURATION</th>
-                        <th>PEOPLE</th>
-                        <th>PURPOSE</th>
+                        <th>TYPE</th>
+                        <th>CAPACITY</th>
+                        <th>LOCATION</th>
                         <th>STATUS</th>
+                        <th>ACTION</th>
 
                     </tr>
 
@@ -676,7 +588,97 @@
 
                 <tbody>
 
-                    {% if recent_bookings %}
+                    {% for room in rooms %}
+
+                    <tr>
+
+                        <td class="room-name">
+                            {{ room["name"] }}
+                        </td>
+
+                        <td>
+                            {{ room["room_type"] }}
+                        </td>
+
+                        <td>
+                            {{ room["capacity"] }}
+                        </td>
+
+                        <td>
+                            {{ room["floor"] }}
+                        </td>
+
+                        <td class="available">
+                            Available
+                        </td>
+
+                        <td>
+
+                            <a href="/edit-room/{{ room['id'] }}" class="action">
+                                Edit
+                            </a>
+
+                            <form method="POST" action="/delete-room/{{ room['id'] }}" style="display:inline;"
+                                onsubmit="return confirmDelete();">
+
+                                <button type="submit" class="action"
+                                    style="border:none; background:none; padding:0; cursor:pointer;">
+
+                                    Delete
+
+                                </button>
+
+                            </form>
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </section>
+
+        <!-- RECENT BOOKINGS -->
+
+        <section class="section">
+
+            <div class="section-header">
+
+                <h2>
+                    Recent Bookings
+                </h2>
+
+            </div>
+
+            <div style="overflow-x:auto;">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>ROOM</th>
+                            <th>CUSTOMER</th>
+                            <th>EMAIL</th>
+                            <th>DATE</th>
+                            <th>TIME</th>
+                            <th>DURATION</th>
+                            <th>PEOPLE</th>
+                            <th>PURPOSE</th>
+                            <th>STATUS</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        {% if recent_bookings %}
 
                         {% for booking in recent_bookings %}
 
@@ -716,35 +718,63 @@
 
                             <td>
 
-                                <span class="{{ 'available' if booking['status'] == 'Confirmed' else 'booked' }}">
+                                <span class="{{ 'available' if booking['status']|lower == 'confirmed' else 'booked' }}">
                                     {{ booking["status"] }}
                                 </span>
 
-                                {% if booking["status"] == "Confirmed" %}
+                                {% if booking["status"]|lower == "pending" %}
 
-                                    <form
-                                        method="POST"
-                                        action="/admin/cancel-booking/{{ booking['id'] }}"
-                                        style="margin-top:8px;"
-                                        onsubmit="return confirmCancelBooking();">
+                                <form method="POST" action="/admin/approve-booking/{{ booking['id'] }}"
+                                    style="margin-top:8px; display:inline-block;">
 
-                                        <button
-                                            type="submit"
-                                            style="
-                                                border:none;
-                                                background:#dc2626;
-                                                color:white;
-                                                padding:6px 10px;
-                                                border-radius:5px;
-                                                cursor:pointer;
-                                                font-size:12px;
-                                            ">
+                                    <button type="submit" style="
+                                        border:none;
+                                        background:#16a34a;
+                                        color:white;
+                                        padding:6px 10px;
+                                        border-radius:5px;
+                                        cursor:pointer;
+                                        font-size:12px;
+                                    ">
+                                        Approve
+                                    </button>
+                                </form>
 
-                                            Cancel Booking
+                                <form method="POST" action="/admin/reject-booking/{{ booking['id'] }}"
+                                    style="margin-top:8px; display:inline-block;"
+                                    onsubmit="return confirm('Reject this booking request?');">
 
-                                        </button>
+                                    <button type="submit" style="
+                                        border:none;
+                                        background:#dc2626;
+                                        color:white;
+                                        padding:6px 10px;
+                                        border-radius:5px;
+                                        cursor:pointer;
+                                        font-size:12px;
+                                    ">
+                                        Reject
+                                    </button>
+                                </form>
 
-                                    </form>
+                                {% elif booking["status"]|lower == "confirmed" %}
+
+                                <form method="POST" action="/admin/cancel-booking/{{ booking['id'] }}"
+                                    style="margin-top:8px;" onsubmit="return confirmCancelBooking();">
+
+                                    <button type="submit" style="
+                                        border:none;
+                                        background:#dc2626;
+                                        color:white;
+                                        padding:6px 10px;
+                                        border-radius:5px;
+                                        cursor:pointer;
+                                        font-size:12px;
+                                    ">
+                                        Cancel Booking
+                                    </button>
+
+                                </form>
 
                                 {% endif %}
 
@@ -754,13 +784,11 @@
 
                         {% endfor %}
 
-                    {% else %}
+                        {% else %}
 
                         <tr>
 
-                            <td
-                                colspan="9"
-                                style="text-align:center; color:#667085; padding:30px;">
+                            <td colspan="9" style="text-align:center; color:#667085; padding:30px;">
 
                                 No bookings yet.
 
@@ -768,43 +796,43 @@
 
                         </tr>
 
-                    {% endif %}
+                        {% endif %}
 
-                </tbody>
+                    </tbody>
 
-            </table>
+                </table>
 
-        </div>
+            </div>
 
-    </section>
+        </section>
 
-</main>
+    </main>
 
-<footer>
+    <footer>
 
-    CampusSpace · Administration Portal · 2026
+        CampusSpace · Administration Portal · 2026
 
-</footer>
+    </footer>
 
-<script>
+    <script>
 
-function confirmDelete() {
+        function confirmDelete() {
 
-    return confirm(
-        "Delete this room?\n\nThis action cannot be undone."
-    );
+            return confirm(
+                "Delete this room?\n\nThis action cannot be undone."
+            );
 
-}
+        }
 
-function confirmCancelBooking() {
+        function confirmCancelBooking() {
 
-    return confirm(
-        "Cancel this booking?\n\nThis action cannot be undone."
-    );
+            return confirm(
+                "Cancel this booking?\n\nThis action cannot be undone."
+            );
 
-}
+        }
 
-</script>
+    </script>
 
 </body>
 

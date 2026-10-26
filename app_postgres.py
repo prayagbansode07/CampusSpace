@@ -77,11 +77,16 @@ class PostgresConnection:
         query = query.replace("?", "%s")
         return self.connection.execute(query, parameters)
 
+
     def commit(self):
         self.connection.commit()
 
+    def rollback(self):
+        self.connection.rollback()
+
     def close(self):
         self.connection.close()
+
 
 
 def get_db():
@@ -924,7 +929,7 @@ def book_room():
         # Get existing bookings for this room and date
         # Get existing confirmed bookings for this room and date
         existing_bookings = connection.execute("""
-            SELECT id, booking_time, duration, booker_role
+            SELECT id, name, email, booking_date, booking_time, duration, booker_role
             FROM bookings
             WHERE room_id = ?
             AND booking_date = ?
@@ -975,7 +980,6 @@ def book_room():
 
 
         # Check for overlapping bookings
-        student_bookings_to_cancel = []
         cancelled_student_bookings = []
 
         for booking in existing_bookings:
@@ -1025,6 +1029,8 @@ def book_room():
 
 
             # Save booking
+
+        # Save booking as pending until admin approval.
         connection.execute("""
             INSERT INTO bookings
             (
@@ -1036,9 +1042,10 @@ def book_room():
                 duration,
                 people,
                 purpose,
-                booker_role
+                booker_role,
+                status
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
             room_id,
             name,
@@ -1048,61 +1055,16 @@ def book_room():
             duration,
             people,
             purpose,
-            user_role
+            user_role,
+            "Pending"
         ))
 
 
 
-        # Save the new booking first.
-
-        # Cancel overlapping student bookings only after
-        # the faculty booking has been saved successfully.
-        for student_booking_id in student_bookings_to_cancel:
-
-            student_booking = connection.execute("""
-                SELECT name, email, booking_date, booking_time
-                FROM bookings
-                WHERE id = ?
-            """, (student_booking_id,)).fetchone()
-
-            connection.execute("""
-                UPDATE bookings
-                SET status = 'Cancelled'
-                WHERE id = ?
-            """, (student_booking_id,))
-
-            if student_booking:
-                cancelled_student_bookings.append({
-                    "name": student_booking["name"],
-                    "email": student_booking["email"],
-                    "booking_date": student_booking["booking_date"],
-                    "booking_time": student_booking["booking_time"]
-                })
-
+        # Keep the new booking pending until admin approval.
+        # Faculty-priority cancellations will be handled during approval.
         connection.commit()
         connection.close()
-
-
-        for student_booking in cancelled_student_bookings:
-            try:
-                send_email_via_resend(
-                    student_booking["email"],
-                    "CampusSpace Booking Cancelled — Faculty Priority",
-                    f"""Hello {student_booking['name']},
-
-Your CampusSpace room booking has been cancelled because an approved faculty booking takes priority for an overlapping time slot.
-
-Date: {student_booking['booking_date']}
-Time: {student_booking['booking_time']}
-
-Please visit CampusSpace to find another available room.
-
-Regards,
-CampusSpace
-"""
-                )
-            except Exception as e:
-                print("FACULTY PRIORITY EMAIL ERROR:", e)
 
 
 
@@ -1115,46 +1077,60 @@ CampusSpace
             margin-top: 100px;
         ">
 
-            <h1 style="color: #16a34a;">
-                Booking Confirmed!
-            </h1>
 
-            <p>
-                Thank you, <strong>{name}</strong>.
-            </p>
+<h1 style="color: #d97706;">
+    Booking Pending Approval
+</h1>
 
-            <p>
-                <strong>Room:</strong> {room["name"]}
-            </p>
+<p>
+    Thank you, <strong>{name}</strong>.
+</p>
 
-            <p>
-                <strong>Date:</strong> {booking_date}
-            </p>
+<p>
+    Your booking request has been submitted successfully.
+    It will be confirmed after admin approval.
+</p>
 
-            <p>
-                <strong>Time:</strong> {booking_time}
-            </p>
+<p>
+    <strong>Room:</strong> {room["name"]}
+</p>
 
-            <p>
-                <strong>Duration:</strong> {duration} hour(s)
-            </p>
+<p>
+    <strong>Date:</strong> {booking_date}
+</p>
 
-            <br>
+<p>
+    <strong>Time:</strong> {booking_time}
+</p>
 
-            <a href="/"
-               style="
-                    display: inline-block;
-                    background: #2563eb;
-                    color: white;
-                    padding: 12px 22px;
-                    border-radius: 8px;
-                    text-decoration: none;
-               ">
-                Back to CampusSpace
-            </a>
+<p>
+    <strong>Duration:</strong> {duration} hour(s)
+</p>
 
-        </div>
-        """
+<p style="margin-top: 24px; color: #475467;">
+    Thank you for choosing BookMySlot!
+</p>
+
+<p style="line-height: 1.6;">
+    Best regards,<br>
+    <strong>Team BookMySlot</strong>
+</p>
+
+<br>
+
+<a href="/"
+   style="
+        display: inline-block;
+        background: #2563eb;
+        color: white;
+        padding: 12px 22px;
+        border-radius: 8px;
+        text-decoration: none;
+   ">
+    Back to CampusSpace
+</a>
+</div>
+"""
 
 
     return render_template("book_room.html", room=room)
@@ -1190,6 +1166,207 @@ def admin_cancel_booking(booking_id):
 
     connection.commit()
     connection.close()
+
+    return redirect(url_for("admin"))
+@app.route("/admin/approve-booking/<int:booking_id>", methods=["POST"])
+def admin_approve_booking(booking_id):
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    if session.get("user_role") != "admin":
+        flash("Access denied. Admin only.", "error")
+        return redirect(url_for("home"))
+
+    connection = get_db()
+
+    try:
+        booking = connection.execute("""
+            SELECT bookings.*, users.role AS current_role,
+                   users.faculty_status AS current_faculty_status
+            FROM bookings
+            LEFT JOIN users ON LOWER(users.email) = LOWER(bookings.email)
+            WHERE bookings.id = ?
+        """, (booking_id,)).fetchone()
+
+        if booking is None:
+            flash("Booking not found.", "error")
+            return redirect(url_for("admin"))
+
+        if (booking["status"] or "").lower() != "pending":
+            flash("Only pending bookings can be approved.", "error")
+            return redirect(url_for("admin"))
+
+        # Faculty priority is available only to currently approved faculty.
+        is_approved_faculty = (
+            booking["booker_role"] == "faculty"
+            and booking["current_role"] == "faculty"
+            and booking["current_faculty_status"] == "approved"
+        )
+
+        requested_start = datetime.strptime(
+            f"{booking['booking_date']} {booking['booking_time']}",
+            "%Y-%m-%d %I:%M %p"
+        )
+        requested_end = requested_start + timedelta(
+            hours=int(booking["duration"])
+        )
+        day_name = requested_start.strftime("%A")
+
+        # Check timetable conflicts again at approval time.
+        lectures = connection.execute("""
+            SELECT start_time, end_time
+            FROM timetable
+            WHERE room_id = ? AND day = ?
+        """, (booking["room_id"], day_name)).fetchall()
+
+        for lecture in lectures:
+            lecture_start = datetime.strptime(
+                f"{booking['booking_date']} {lecture['start_time']}",
+                "%Y-%m-%d %H:%M"
+            )
+            lecture_end = datetime.strptime(
+                f"{booking['booking_date']} {lecture['end_time']}",
+                "%Y-%m-%d %H:%M"
+            )
+
+            if requested_start < lecture_end and requested_end > lecture_start:
+                flash("Cannot approve: this booking overlaps a timetable lecture.", "error")
+                return redirect(url_for("admin"))
+
+        # Find confirmed bookings that overlap this request.
+        existing_bookings = connection.execute("""
+            SELECT id, name, email, booking_date, booking_time, duration, booker_role
+            FROM bookings
+            WHERE room_id = ?
+              AND booking_date = ?
+              AND LOWER(status) = 'confirmed'
+              AND id != ?
+        """, (
+            booking["room_id"],
+            booking["booking_date"],
+            booking_id
+        )).fetchall()
+
+        student_bookings_to_cancel = []
+        cancelled_student_bookings = []
+
+        for existing in existing_bookings:
+            existing_start = datetime.strptime(
+                f"{booking['booking_date']} {existing['booking_time']}",
+                "%Y-%m-%d %I:%M %p"
+            )
+            existing_end = existing_start + timedelta(
+                hours=int(existing["duration"])
+            )
+
+            if requested_start < existing_end and requested_end > existing_start:
+                if is_approved_faculty and existing["booker_role"] == "student":
+                    student_bookings_to_cancel.append(existing["id"])
+                    cancelled_student_bookings.append({
+                        "name": existing["name"],
+                        "email": existing["email"],
+                        "booking_date": existing["booking_date"],
+                        "booking_time": existing["booking_time"]
+                    })
+                else:
+                    flash(
+                        "Cannot approve: another confirmed booking overlaps this time.",
+                        "error"
+                    )
+                    return redirect(url_for("admin"))
+
+        # Cancel overlapping student bookings only after all checks pass.
+        for student_booking_id in student_bookings_to_cancel:
+            connection.execute("""
+                UPDATE bookings
+                SET status = 'Cancelled'
+                WHERE id = ?
+            """, (student_booking_id,))
+
+        connection.execute("""
+            UPDATE bookings
+            SET status = 'Confirmed'
+            WHERE id = ?
+        """, (booking_id,))
+
+        connection.commit()
+        for student_booking in cancelled_student_bookings:
+            try:
+                send_email_via_resend(
+                    student_booking["email"],
+                    "CampusSpace Booking Cancelled — Faculty Priority",
+                    f"""Hello {student_booking['name']},
+
+Your CampusSpace room booking has been cancelled because an approved faculty booking takes priority for an overlapping time slot.
+
+Date: {student_booking['booking_date']}
+Time: {student_booking['booking_time']}
+
+Please visit CampusSpace to find another available room.
+
+Regards,
+CampusSpace
+"""
+                )
+            except Exception:
+                app.logger.exception(
+                    "Faculty-priority cancellation email failed"
+                )
+        flash("Booking approved successfully.", "success")
+
+    except Exception:
+        connection.rollback()
+        app.logger.exception("Failed to approve booking %s", booking_id)
+        flash("Could not approve booking. Check the application logs.", "error")
+
+    finally:
+        connection.close()
+
+    return redirect(url_for("admin"))
+
+
+@app.route("/admin/reject-booking/<int:booking_id>", methods=["POST"])
+def admin_reject_booking(booking_id):
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    if session.get("user_role") != "admin":
+        flash("Access denied. Admin only.", "error")
+        return redirect(url_for("home"))
+
+    connection = get_db()
+
+    try:
+        booking = connection.execute("""
+            SELECT id, status
+            FROM bookings
+            WHERE id = ?
+        """, (booking_id,)).fetchone()
+
+        if booking is None:
+            flash("Booking not found.", "error")
+            return redirect(url_for("admin"))
+
+        if (booking["status"] or "").lower() != "pending":
+            flash("Only pending bookings can be rejected.", "error")
+            return redirect(url_for("admin"))
+
+        connection.execute("""
+            UPDATE bookings
+            SET status = 'Rejected'
+            WHERE id = ?
+        """, (booking_id,))
+
+        connection.commit()
+        flash("Booking rejected.", "success")
+
+    except Exception:
+        connection.rollback()
+        app.logger.exception("Failed to reject booking %s", booking_id)
+        flash("Could not reject booking. Check the application logs.", "error")
+
+    finally:
+        connection.close()
 
     return redirect(url_for("admin"))
 # -----------------------------
