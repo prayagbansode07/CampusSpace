@@ -92,24 +92,36 @@ def get_db():
     return connection
 
 def send_email_via_resend(receiver_email, subject, body):
-    smtp_login = os.environ.get("SMTP_LOGIN")
-    smtp_key = os.environ.get("SMTP_KEY")
-    sender_email = os.environ.get("CAMPUSSPACE_EMAIL") or smtp_login
+    api_key = os.environ.get("BREVO_API_KEY")
+    sender_email = os.environ.get("CAMPUSSPACE_EMAIL")
 
-    if not smtp_login or not smtp_key or not sender_email:
-        raise Exception("Brevo SMTP environment variables are not configured.")
+    if not api_key or not sender_email:
+        raise Exception("BREVO_API_KEY or CAMPUSSPACE_EMAIL is not configured.")
 
-    message = MIMEText(body, "plain", "utf-8")
-    message["Subject"] = subject
-    message["From"] = sender_email
-    message["To"] = receiver_email
+    email_data = {
+        "sender": {"name": "CampusSpace", "email": sender_email},
+        "to": [{"email": receiver_email}],
+        "subject": subject,
+        "textContent": body
+    }
 
-    with smtplib.SMTP("smtp-relay.brevo.com", 587, timeout=20) as server:
-        server.starttls()
-        server.login(smtp_login, smtp_key)
-        server.send_message(message)
+    request = Request(
+        "https://api.brevo.com/v3/smtp/email",
+        data=json.dumps(email_data).encode("utf-8"),
+        headers={
+            "api-key": api_key,
+            "Content-Type": "application/json",
+            "accept": "application/json"
+        },
+        method="POST"
+    )
 
-
+    try:
+        with urlopen(request, timeout=20) as response:
+            response.read()
+    except HTTPError as error:
+        print("BREVO API ERROR:", error.read().decode("utf-8"))
+        raise
 def send_otp_email(receiver_email, otp):
 
     subject = "CampusSpace Email Verification OTP"
