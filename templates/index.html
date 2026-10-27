@@ -10,7 +10,6 @@
     <title>CampusSpace | Campus Room Booking</title>
 
     <style>
-
         * {
             margin: 0;
             padding: 0;
@@ -135,7 +134,7 @@
             margin-bottom: 7px;
         }
 
-        .search-panel > p {
+        .search-panel>p {
             color: #667085;
             font-size: 15px;
             margin-bottom: 25px;
@@ -458,6 +457,75 @@
 
         }
 
+        /* Facility category cards */
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 22px;
+            margin: 28px 0 40px;
+        }
+
+        .category-card {
+            display: block;
+            overflow: hidden;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            text-decoration: none;
+            color: #172033;
+            box-shadow: 0 6px 20px rgba(16, 28, 53, 0.07);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .category-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 28px rgba(16, 28, 53, 0.13);
+        }
+
+        .category-image {
+            display: block;
+            width: 100%;
+            height: 190px;
+            object-fit: cover;
+        }
+
+        .category-card-content {
+            padding: 20px;
+        }
+
+        .category-card h3 {
+            margin: 0 0 8px;
+            font-size: 20px;
+        }
+
+        .category-card p {
+            margin: 0;
+            color: #68748a;
+            line-height: 1.5;
+        }
+
+        .category-link {
+            display: inline-block;
+            margin-top: 16px;
+            color: #3156a6;
+            font-weight: 700;
+        }
+
+        @media (max-width: 760px) {
+            .category-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 520px) {
+            .category-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .category-image {
+                height: 210px;
+            }
+        }
     </style>
 
 </head>
@@ -465,41 +533,41 @@
 
 <body>
 
-<header>
+    <header>
 
-    <div class="brand">
+        <div class="brand">
 
-        <div class="brand-mark">
-            CS
+            <div class="brand-mark">
+                CS
+            </div>
+
+            <div class="brand-name">
+                CampusSpace
+            </div>
+
         </div>
 
-        <div class="brand-name">
-            CampusSpace
-        </div>
 
-    </div>
+        <nav>
 
+            <a href="/">
+                Home
+            </a>
 
-    <nav>
+            <a href="/find-room">
+                Rooms
+            </a>
 
-        <a href="/">
-            Home
-        </a>
+            <a href="/my-bookings">
+                My Bookings
+            </a>
 
-        <a href="/find-room">
-            Rooms
-        </a>
-
-        <a href="/my-bookings">
-            My Bookings
-        </a>
-
-        <a href="/help">
-            Help
-        </a>
+            <a href="/help">
+                Help
+            </a>
 
 
-        {% if session.get("user_id") %}
+            {% if session.get("user_id") %}
 
             <span style="color:#d9dee7; font-size:15px;">
                 Welcome, {{ session.get("user_name") }}
@@ -508,9 +576,9 @@
 
             {% if session.get("user_role") == "admin" %}
 
-                <a href="/admin">
-                    Admin Dashboard
-                </a>
+            <a href="/admin">
+                Admin Dashboard
+            </a>
 
             {% endif %}
 
@@ -520,393 +588,427 @@
             </a>
 
 
-        {% else %}
+            {% else %}
 
             <a href="/login" class="login">
                 Login
             </a>
 
-        {% endif %}
+            {% endif %}
 
-    </nav>
+        </nav>
 
-</header>
-
-
-<main>
-
-    <!-- WELCOME -->
-
-    <section class="welcome">
-
-        <p>
-            Campus room & facility management
-        </p>
-
-        <h1>
-            Welcome to CampusSpace
-        </h1>
-
-    </section>
+    </header>
 
 
-    <!-- SEARCH -->
+    <main>
 
-    <section class="search-panel">
+        <!-- WELCOME -->
 
-        <h2>
-            Find a room
-        </h2>
+        <section class="welcome">
 
-        <p>
-            Search campus spaces by room type, date and time.
-        </p>
+            <p>
+                Campus room & facility management
+            </p>
 
+            <h1>
+                Welcome to CampusSpace
+            </h1>
 
-        <div class="search-fields">
-
-            <div class="field">
-
-                <label>
-                    Room or building
-                </label>
-
-                <input
-                    type="text"
-                    placeholder="e.g. A-101">
-
-            </div>
+        </section>
 
 
-            <div class="field">
+        <!-- SEARCH -->
 
-                <label>
-                    Room type
-                </label>
-
-                <select>
-
-                    <option>
-                        Any type
-                    </option>
-
-                    <option>
-                        Classroom
-                    </option>
-
-                    <option>
-                        Computer Laboratory
-                    </option>
-
-                    <option>
-                        Meeting Room
-                    </option>
-
-                    <option>
-                        Seminar Hall
-                    </option>
-
-                    <option>
-                        Auditorium
-                    </option>
-
-                </select>
-
-            </div>
-
-
-            <div class="field">
-
-                <label>
-                    Date
-                </label>
-
-                <input type="date">
-
-            </div>
-
-
-            <div class="field">
-
-                <label>
-                    Time
-                </label>
-
-                <select>
-
-                    <option>
-                        Any time
-                    </option>
-
-                    <option>
-                        09:00 AM
-                    </option>
-
-                    <option>
-                        10:00 AM
-                    </option>
-
-                    <option>
-                        11:00 AM
-                    </option>
-
-                    <option>
-                        12:00 PM
-                    </option>
-
-                    <option>
-                        01:00 PM
-                    </option>
-
-                    <option>
-                        02:00 PM
-                    </option>
-
-                    <option>
-                        03:00 PM
-                    </option>
-
-                    <option>
-                        04:00 PM
-                    </option>
-
-                </select>
-
-            </div>
-
-
-            <a
-                href="/find-room"
-                class="search-button"
-                style="display:flex;align-items:center;justify-content:center;text-decoration:none;">
-
-                Search
-
-            </a>
-
-        </div>
-
-    </section>
-
-
-    <!-- ROOMS -->
-
-    <section>
-
-        <div class="section-heading">
+        <section class="search-panel">
 
             <h2>
-                Campus spaces
+                Find a room
             </h2>
 
-            <a href="/find-room">
-                View all rooms →
-            </a>
-
-        </div>
+            <p>
+                Search campus spaces by room type, date and time.
+            </p>
 
 
-        <table class="room-table">
+            <div class="search-fields">
 
-            <thead>
+                <div class="field">
 
-                <tr>
+                    <label>
+                        Room or building
+                    </label>
 
-                    <th>
-                        ROOM
-                    </th>
+                    <input type="text" placeholder="e.g. A-101">
 
-                    <th>
-                        TYPE
-                    </th>
-
-                    <th>
-                        CAPACITY
-                    </th>
-
-                    <th>
-                        LOCATION
-                    </th>
-
-                    <th>
-                        STATUS
-                    </th>
-
-                    <th></th>
-
-                </tr>
-
-            </thead>
+                </div>
 
 
-            
+                <div class="field">
 
-            <tbody>
-                {% for room in rooms %}
-                <tr>
-                    <td class="room-name">
-                        {{ room["name"] }}
-                    </td>
+                    <label>
+                        Room type
+                    </label>
 
-                    <td class="room-type">
-                        {{ room["room_type"] }}
-                    </td>
+                    <select>
 
-                    <td>
-                        {{ room["capacity"] }}
-                    </td>
+                        <option>
+                            Any type
+                        </option>
 
-                    <td>
-                        {{ room["floor"] }}
-                    </td>
+                        <option>
+                            Classroom
+                        </option>
 
-                    <td>
-                        <span class="status">
-                            <span class="status-dot"></span>
-                            Available
-                        </span>
-                    </td>
+                        <option>
+                            Computer Laboratory
+                        </option>
 
-                    <td>
-                        <a
-                            href="/book-room?room_id={{ room['id'] }}"
-                            class="book-button">
-                            Book
-                        </a>
-                    </td>
-                </tr>
-                {% else %}
-                <tr>
-                    <td colspan="6" style="text-align: center; padding: 30px;">
-                        No rooms have been added by the admin yet.
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
+                        <option>
+                            Meeting Room
+                        </option>
+
+                        <option>
+                            Seminar Hall
+                        </option>
+
+                        <option>
+                            Auditorium
+                        </option>
+
+                    </select>
+
+                </div>
 
 
-        </table>
+                <div class="field">
 
-    </section>
+                    <label>
+                        Date
+                    </label>
 
+                    <input type="date">
 
-    <!-- INFORMATION -->
-
-    <section class="info-grid">
-
-        <div class="info-box">
-
-            <h3>
-                Quick access
-            </h3>
-
-            <div class="info-item">
-
-                <span class="info-label">
-                    Find a room
-                </span>
-
-                <a
-                    href="/find-room"
-                    class="info-value"
-                    style="color:#172033; text-decoration:none;">
-
-                    Open
-
-                </a>
-
-            </div>
+                </div>
 
 
-            <div class="info-item">
+                <div class="field">
 
-                <span class="info-label">
-                    My bookings
-                </span>
+                    <label>
+                        Time
+                    </label>
 
-                <a
-                    href="/my-bookings"
-                    class="info-value"
-                    style="color:#172033; text-decoration:none;">
+                    <select>
 
-                    View
+                        <option>
+                            Any time
+                        </option>
+
+                        <option>
+                            09:00 AM
+                        </option>
+
+                        <option>
+                            10:00 AM
+                        </option>
+
+                        <option>
+                            11:00 AM
+                        </option>
+
+                        <option>
+                            12:00 PM
+                        </option>
+
+                        <option>
+                            01:00 PM
+                        </option>
+
+                        <option>
+                            02:00 PM
+                        </option>
+
+                        <option>
+                            03:00 PM
+                        </option>
+
+                        <option>
+                            04:00 PM
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <a href="/find-room" class="search-button"
+                    style="display:flex;align-items:center;justify-content:center;text-decoration:none;">
+
+                    Search
 
                 </a>
 
             </div>
 
+        </section>
 
-            <div class="info-item">
 
-                <span class="info-label">
-                    Room availability
-                </span>
+        <!-- ROOMS -->
 
-                <span class="info-value">
-                    Live
-                </span>
+        <!-- FACILITY CATEGORIES -->
+
+        <section class="categories-section">
+
+            <div class="section-heading">
+                <h2>Explore Campus Facilities</h2>
+                <a href="/find-room">View all rooms →</a>
+            </div>
+
+            <div class="category-grid">
+
+                <a class="category-card" href="/category/Seminar%20Hall">
+                    <img class="category-image" src="{{ url_for('static', filename='images/seminar-hall.jpeg') }}"
+                        alt="Seminar hall">
+                    <div class="category-card-content">
+                        <h3>Seminar Halls</h3>
+                        <p>Explore seminar halls available on campus.</p>
+                        <span class="category-link">Explore halls →</span>
+                    </div>
+                </a>
+
+                <a class="category-card" href="/category/Classroom">
+                    <img class="category-image" src="{{ url_for('static', filename='images/classroom.jpg') }}"
+                        alt="Classroom">
+                    <div class="category-card-content">
+                        <h3>Classrooms</h3>
+                        <p>Find a suitable classroom for your needs.</p>
+                        <span class="category-link">Explore classrooms →</span>
+                    </div>
+                </a>
+
+                <a class="category-card" href="/category/Computer%20Laboratory">
+                    <img class="category-image" src="{{ url_for('static', filename='images/computer-lab.jpg') }}"
+                        alt="Computer laboratory">
+                    <div class="category-card-content">
+                        <h3>Computer Laboratories</h3>
+                        <p>Browse computer labs available for booking.</p>
+                        <span class="category-link">Explore laboratories →</span>
+                    </div>
+                </a>
 
             </div>
 
-        </div>
+        </section>
 
 
-        <div class="info-box">
+        <section>
 
-            <h3>
-                Booking information
-            </h3>
+            <div class="section-heading">
 
-            <div class="info-item">
+                <h2>
+                    Campus spaces
+                </h2>
 
-                <span class="info-label">
-                    Available spaces
-                </span>
-
-                <span class="info-value">
-                    {{ available_spaces }}
-                </span>
+                <a href="/find-room">
+                    View all rooms →
+                </a>
 
             </div>
 
 
-            <div class="info-item">
+            <table class="room-table">
 
-                <span class="info-label">
-                    Booking method
-                </span>
+                <thead>
 
-                <span class="info-value">
-                    Online
-                </span>
+                    <tr>
+
+                        <th>
+                            ROOM
+                        </th>
+
+                        <th>
+                            TYPE
+                        </th>
+
+                        <th>
+                            CAPACITY
+                        </th>
+
+                        <th>
+                            LOCATION
+                        </th>
+
+                        <th>
+                            STATUS
+                        </th>
+
+                        <th></th>
+
+                    </tr>
+
+                </thead>
+
+
+
+
+                <tbody>
+                    {% for room in rooms %}
+                    <tr>
+                        <td class="room-name">
+                            {{ room["name"] }}
+                        </td>
+
+                        <td class="room-type">
+                            {{ room["room_type"] }}
+                        </td>
+
+                        <td>
+                            {{ room["capacity"] }}
+                        </td>
+
+                        <td>
+                            {{ room["floor"] }}
+                        </td>
+
+                        <td>
+                            <span class="status">
+                                <span class="status-dot"></span>
+                                Available
+                            </span>
+                        </td>
+
+                        <td>
+                            <a href="/book-room?room_id={{ room['id'] }}" class="book-button">
+                                Book
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 30px;">
+                            No rooms have been added by the admin yet.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+
+
+            </table>
+
+        </section>
+
+
+        <!-- INFORMATION -->
+
+        <section class="info-grid">
+
+            <div class="info-box">
+
+                <h3>
+                    Quick access
+                </h3>
+
+                <div class="info-item">
+
+                    <span class="info-label">
+                        Find a room
+                    </span>
+
+                    <a href="/find-room" class="info-value" style="color:#172033; text-decoration:none;">
+
+                        Open
+
+                    </a>
+
+                </div>
+
+
+                <div class="info-item">
+
+                    <span class="info-label">
+                        My bookings
+                    </span>
+
+                    <a href="/my-bookings" class="info-value" style="color:#172033; text-decoration:none;">
+
+                        View
+
+                    </a>
+
+                </div>
+
+
+                <div class="info-item">
+
+                    <span class="info-label">
+                        Room availability
+                    </span>
+
+                    <span class="info-value">
+                        Live
+                    </span>
+
+                </div>
 
             </div>
 
 
-            <div class="info-item">
+            <div class="info-box">
 
-                <span class="info-label">
-                    Confirmation
-                </span>
+                <h3>
+                    Booking information
+                </h3>
 
-                <span class="info-value">
-                    Immediate
-                </span>
+                <div class="info-item">
+
+                    <span class="info-label">
+                        Available spaces
+                    </span>
+
+                    <span class="info-value">
+                        {{ available_spaces }}
+                    </span>
+
+                </div>
+
+
+                <div class="info-item">
+
+                    <span class="info-label">
+                        Booking method
+                    </span>
+
+                    <span class="info-value">
+                        Online
+                    </span>
+
+                </div>
+
+
+                <div class="info-item">
+
+                    <span class="info-label">
+                        Confirmation
+                    </span>
+
+                    <span class="info-value">
+                        Immediate
+                    </span>
+
+                </div>
 
             </div>
 
-        </div>
+        </section>
 
-    </section>
-
-</main>
+    </main>
 
 
-<footer>
+    <footer>
 
-    CampusSpace · Campus Room & Facility Booking System · 2026
+        CampusSpace · Campus Room & Facility Booking System · 2026
 
-</footer>
+    </footer>
 
 
 </body>

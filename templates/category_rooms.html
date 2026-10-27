@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ category_name }} | CampusSpace</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f7fb;
+            color: #172033;
+        }
+
+        header {
+            background: #101c35;
+            color: white;
+            padding: 20px 6%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        header a {
+            color: white;
+            text-decoration: none;
+        }
+
+        .brand {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        main {
+            max-width: 1200px;
+            margin: 36px auto;
+            padding: 0 20px;
+        }
+
+        .back {
+            color: #3156a6;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        h1 {
+            margin: 22px 0 8px;
+            font-size: 32px;
+        }
+
+        .subtitle {
+            color: #68748a;
+            margin-bottom: 28px;
+        }
+
+        .room-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+        }
+
+        .room-card {
+            background: white;
+            border: 1px solid #e3e9f2;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 5px 18px rgba(20, 35, 65, .05);
+        }
+
+        .room-card h2 {
+            font-size: 21px;
+            margin: 0 0 18px;
+        }
+
+        .detail {
+            color: #5e6b80;
+            margin: 10px 0;
+        }
+
+        .book {
+            display: block;
+            margin-top: 22px;
+            padding: 12px 16px;
+            text-align: center;
+            color: white;
+            background: #3156a6;
+            border-radius: 9px;
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        .book:hover {
+            background: #244486;
+        }
+
+        .empty {
+            background: white;
+            padding: 28px;
+            border-radius: 12px;
+            color: #68748a;
+        }
+
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 26px;
+            }
+
+            main {
+                margin-top: 24px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <a class="brand" href="/">CampusSpace</a>
+        <a href="/">Home</a>
+    </header>
+
+    <main>
+        <a class="back" href="/">← Back to categories</a>
+        <h1>{{ category_name }}</h1>
+        <p class="subtitle">Choose a room to view the booking form.</p>
+
+        {% if rooms %}
+        <div class="room-grid">
+            {% for room in rooms %}
+            <article class="room-card">
+                <h2>{{ room["name"] }}</h2>
+                <p class="detail"><strong>Capacity:</strong> {{ room["capacity"] }}</p>
+                <p class="detail"><strong>Location:</strong> {{ room["floor"] }}</p>
+                <a class="book" href="/book-room?room_id={{ room['id'] }}">Book Room</a>
+            </article>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty">No rooms have been added to this category yet.</div>
+        {% endif %}
+    </main>
+</body>
+
+</html>

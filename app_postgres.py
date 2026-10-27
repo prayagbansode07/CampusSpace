@@ -481,6 +481,34 @@ def find_room():
         room_conflicts=room_conflicts
     )
 
+@app.route("/category/<path:category_name>")
+def category_rooms(category_name):
+    allowed_categories = [
+        "Seminar Hall",
+        "Classroom",
+        "Computer Laboratory"
+    ]
+
+    if category_name not in allowed_categories:
+        flash("Category not found.", "error")
+        return redirect(url_for("home"))
+
+    connection = get_db()
+
+    rooms = connection.execute("""
+        SELECT id, name, room_type, capacity, floor
+        FROM rooms
+        WHERE room_type = ?
+        ORDER BY name
+    """, (category_name,)).fetchall()
+
+    connection.close()
+
+    return render_template(
+        "category_rooms.html",
+        category_name=category_name,
+        rooms=rooms
+    )
 
 @app.route("/my-bookings")
 def my_bookings():
