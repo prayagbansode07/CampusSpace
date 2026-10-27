@@ -6,7 +6,7 @@ from flask import Flask, render_template, render_template_string, request, redir
 from werkzeug.security import generate_password_hash, check_password_hash
 import sqlite3
 import psycopg
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import secrets
 import smtplib
 from email.mime.text import MIMEText
@@ -1493,7 +1493,7 @@ def admin():
         FROM rooms
     """).fetchone()["count"]
 
-    today = datetime.now().strftime("%Y-%m-%d")
+    today = datetime.now(timezone(timedelta(hours=5, minutes=30))).strftime("%Y-%m-%d")
 
     today_bookings = connection.execute("""
         SELECT COUNT(*) AS count
