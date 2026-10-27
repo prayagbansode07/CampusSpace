@@ -351,6 +351,24 @@
             </div>
 
 
+            <!-- PARENT / GUARDIAN EMAIL -->
+
+            <div class="field" id="parent-email-field">
+
+                <label for="parent_email">
+                    Parent/Guardian Email
+                </label>
+
+                <input
+                    type="email"
+                    id="parent_email"
+                    name="parent_email"
+                    placeholder="Enter parent or guardian email"
+                >
+
+            </div>
+
+
             <!-- ACCOUNT TYPE -->
 
             <div class="field">
@@ -414,6 +432,25 @@
             button.textContent = "Show";
         }
     }
+    function updateParentEmailField() {
+        const role = document.getElementById("requested_role");
+        const wrapper = document.getElementById("parent-email-field");
+        const email = document.getElementById("parent_email");
+        const isStudent = role.value === "student";
+
+        wrapper.style.display = isStudent ? "block" : "none";
+        email.required = isStudent;
+
+        if (!isStudent) {
+            email.value = "";
+        }
+    }
+
+    document.getElementById("requested_role").addEventListener(
+        "change", updateParentEmailField
+    );
+    updateParentEmailField();
+
 </script>
 </body>
 

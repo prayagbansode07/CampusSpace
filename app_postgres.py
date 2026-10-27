@@ -253,6 +253,19 @@ def init_db():
             ADD COLUMN faculty_status TEXT DEFAULT 'none'
         """)
 
+    user_columns = [
+        row[1]
+        for row in connection.execute(
+            "PRAGMA table_info(users)"
+        ).fetchall()
+    ]
+
+    if "parent_email" not in user_columns:
+        connection.execute("""
+            ALTER TABLE users
+            ADD COLUMN parent_email TEXT
+        """)
+
     booking_columns = [
         row[1]
         for row in connection.execute(
@@ -571,6 +584,11 @@ def register():
         password = request.form["password"]
         confirm_password = request.form["confirm_password"]
         requested_role = request.form.get("requested_role", "student")
+        parent_email = request.form.get("parent_email", "").strip().lower()
+
+        if requested_role == "student" and not parent_email:
+            flash("Parent/Guardian email is required for student registration.", "error")
+            return redirect(url_for("register"))
 
         if password != confirm_password:
             flash("Passwords do not match.", "error")
@@ -604,6 +622,7 @@ def register():
         session["registration_email"] = email
         session["registration_password"] = password
         session["registration_role"] = requested_role
+        session["registration_parent_email"] = parent_email
         session["registration_otp"] = otp
         session["registration_otp_created_at"] = otp_created_at
 
@@ -617,6 +636,7 @@ def register():
             session.pop("registration_email", None)
             session.pop("registration_password", None)
             session.pop("registration_role", None)
+            session.pop("registration_parent_email", None)
             session.pop("registration_otp", None)
 
             flash(
@@ -749,6 +769,7 @@ def verify_otp():
             session.pop("registration_email", None)
             session.pop("registration_password", None)
             session.pop("registration_role", None)
+            session.pop("registration_parent_email", None)
             session.pop("registration_otp", None)
             session.pop("registration_otp_created_at", None)
 
@@ -768,6 +789,7 @@ def verify_otp():
         password = session["registration_password"]
         password = generate_password_hash(password)
         requested_role = session["registration_role"]
+        parent_email = session.get("registration_parent_email") or None
 
         connection = get_db()
 
@@ -775,28 +797,30 @@ def verify_otp():
 
             connection.execute("""
                 INSERT INTO users
-                (name, email, password, role, faculty_status)
-                VALUES (?, ?, ?, ?, ?)
+                (name, email, password, role, faculty_status, parent_email)
+                VALUES (?, ?, ?, ?, ?, ?)
             """, (
                 name,
                 email,
                 password,
                 "student",
-                "pending"
+                "pending",
+                parent_email
             ))
 
         else:
 
             connection.execute("""
                 INSERT INTO users
-                (name, email, password, role, faculty_status)
-                VALUES (?, ?, ?, ?, ?)
+                (name, email, password, role, faculty_status, parent_email)
+                VALUES (?, ?, ?, ?, ?, ?)
             """, (
                 name,
                 email,
                 password,
                 "student",
-                "none"
+                "none",
+                parent_email
             ))
 
         connection.commit()
@@ -807,6 +831,7 @@ def verify_otp():
         session.pop("registration_email", None)
         session.pop("registration_password", None)
         session.pop("registration_role", None)
+        session.pop("registration_parent_email", None)
         session.pop("registration_otp", None)
         session.pop("registration_otp_created_at", None)
 
@@ -880,7 +905,7 @@ def book_room():
         connection = get_db()
 
         logged_in_user = connection.execute("""
-            SELECT name, email, role, faculty_status
+            SELECT name, email, role, faculty_status, parent_email
             FROM users
             WHERE id = ?
         """, (user_id,)).fetchone()
@@ -894,6 +919,7 @@ def book_room():
         name = logged_in_user["name"]
         email = logged_in_user["email"]
         user_role = logged_in_user["role"]
+        parent_email = logged_in_user["parent_email"]
         # Verify faculty approval before granting priority.
         if (
             logged_in_user["role"] == "faculty"
@@ -1065,6 +1091,40 @@ def book_room():
         # Faculty-priority cancellations will be handled during approval.
         connection.commit()
         connection.close()
+
+        # Notify the parent when a student submits a booking request.
+        if user_role == "student" and parent_email:
+            subject = "CampusSpace: Your Child Submitted a Room Booking"
+
+            body = f"""
+Hello Parent/Guardian,
+
+This is to inform you that your child has submitted a room booking request.
+
+Student Name: {name}
+Student Email: {email}
+Room: {room["name"]}
+Date: {booking_date}
+Time: {booking_time}
+Duration: {duration} hour(s)
+Number of People: {people}
+Purpose: {purpose}
+
+Current Status: Pending Admin Approval
+
+The booking is not confirmed yet. It will be confirmed only after
+the administrator approves the request.
+
+Regards,
+CampusSpace Team
+"""
+
+            try:
+                send_email_via_resend(parent_email, subject, body)
+            except Exception:
+                app.logger.exception(
+                    "Parent booking notification email failed."
+                )
 
 
 
