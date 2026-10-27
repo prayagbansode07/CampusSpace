@@ -322,12 +322,24 @@ def help_page():
 # -----------------------------
 
 
+
 @app.route("/find-room")
 def find_room():
 
     selected_date = request.args.get("date")
     selected_time = request.args.get("time")
     selected_duration = request.args.get("duration")
+
+    category_name = request.args.get("category")
+
+    allowed_categories = [
+        "Seminar Hall",
+        "Classroom",
+        "Computer Laboratory"
+    ]
+
+    if category_name not in allowed_categories:
+        category_name = None
 
     connection = get_db()
 
@@ -347,11 +359,19 @@ def find_room():
                 and user["faculty_status"] == "approved"
             )
 
-    rooms = connection.execute("""
-        SELECT id, name, room_type, capacity, floor
-        FROM rooms
-        ORDER BY id
-    """).fetchall()
+    if category_name:
+        rooms = connection.execute("""
+            SELECT id, name, room_type, capacity, floor
+            FROM rooms
+            WHERE room_type = ?
+            ORDER BY id
+        """, (category_name,)).fetchall()
+    else:
+        rooms = connection.execute("""
+            SELECT id, name, room_type, capacity, floor
+            FROM rooms
+            ORDER BY id
+        """).fetchall()
 
     # No search submitted: show all rooms as before.
     if not selected_date or not selected_time or not selected_duration:
@@ -362,6 +382,7 @@ def find_room():
             selected_date=selected_date,
             selected_time=selected_time,
             selected_duration=selected_duration,
+            category_name=category_name,
             room_conflicts={}
         )
 
@@ -478,8 +499,11 @@ def find_room():
         selected_date=selected_date,
         selected_time=selected_time,
         selected_duration=selected_duration,
-        room_conflicts=room_conflicts
+        room_conflicts=room_conflicts,
+        category_name=category_name
+
     )
+
 
 @app.route("/category/<path:category_name>")
 def category_rooms(category_name):
@@ -493,22 +517,7 @@ def category_rooms(category_name):
         flash("Category not found.", "error")
         return redirect(url_for("home"))
 
-    connection = get_db()
-
-    rooms = connection.execute("""
-        SELECT id, name, room_type, capacity, floor
-        FROM rooms
-        WHERE room_type = ?
-        ORDER BY name
-    """, (category_name,)).fetchall()
-
-    connection.close()
-
-    return render_template(
-        "category_rooms.html",
-        category_name=category_name,
-        rooms=rooms
-    )
+    return redirect(url_for("find_room", category=category_name))
 
 @app.route("/my-bookings")
 def my_bookings():

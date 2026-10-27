@@ -5,13 +5,11 @@
 
     <meta charset="UTF-8">
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Find a Room - CampusSpace</title>
 
     <style>
-
         * {
             box-sizing: border-box;
         }
@@ -250,34 +248,48 @@
 
         }
 
-    </style>
+        .availability-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            background: #dcfce7;
+            color: #166534;
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
 
+        .availability-badge.conflict-badge {
+            background: #fef3c7;
+            color: #92400e;
+        }
+    </style>
 </head>
 
 
 <body>
 
 
-<nav>
+    <nav>
 
-    <a href="/">
-        Home
-    </a>
+        <a href="/">
+            Home
+        </a>
 
-    <a href="/find-room">
-        Rooms
-    </a>
+        <a href="/find-room">
+            Rooms
+        </a>
 
-    <a href="/my-bookings">
-        My Bookings
-    </a>
+        <a href="/my-bookings">
+            My Bookings
+        </a>
 
-    <a href="/help">
-        Help
-    </a>
+        <a href="/help">
+            Help
+        </a>
 
 
-    {% if session.get("user_id") %}
+        {% if session.get("user_id") %}
 
         <span style="color:#d9dee7; font-size:15px;">
             Welcome, {{ session.get("user_name") }}
@@ -287,137 +299,125 @@
             Logout
         </a>
 
-    {% else %}
+        {% else %}
 
         <a href="/login" class="login">
             Login
         </a>
 
-    {% endif %}
+        {% endif %}
 
-</nav>
-
-
-
-<main>
+    </nav>
 
 
-    <h1>
-        Find a Room
-    </h1>
 
-    <p class="subtitle">
-        Browse available CampusSpace rooms.
-    </p>
+    <main>
 
 
-    <form method="GET"
-          action="/find-room"
-          class="search-form">
+        <h1>
+            Find a Room
+        </h1>
+
+        <p class="subtitle">
+            Browse available CampusSpace rooms.
+        </p>
 
 
-        <div class="form-grid">
+        <form method="GET" action="/find-room" class="search-form">
+
+            <input type="hidden" name="category" value="{{ category_name or '' }}">
+
+            <div class="form-grid">
+
+                <div class="field">
+
+                    <label>
+                        Date
+                    </label>
+
+                    <input type="date" name="date" required value="{{ selected_date or '' }}">
+
+                </div>
 
 
-            <div class="field">
 
-                <label>
-                    Date
-                </label>
+                <div class="field">
 
-                <input
-                    type="date"
-                    name="date"
-                    required
-                    value="{{ selected_date or '' }}"
-                >
+                    <label>
+                        Start Time
+                    </label>
+
+                    <input type="time" name="time" required value="{{ selected_time or '' }}">
+
+                </div>
+
+
+
+                <div class="field">
+
+                    <label>
+                        Duration
+                    </label>
+
+                    <select name="duration" required>
+
+                        <option value="">
+                            Select duration
+                        </option>
+
+                        <option value="1" {% if selected_duration=="1" %}selected{% endif %}>
+                            1 hour
+                        </option>
+
+                        <option value="2" {% if selected_duration=="2" %}selected{% endif %}>
+                            2 hours
+                        </option>
+
+                        <option value="3" {% if selected_duration=="3" %}selected{% endif %}>
+                            3 hours
+                        </option>
+
+                    </select>
+
+                </div>
+
 
             </div>
 
 
+            <button type="submit" class="search-button">
 
-            <div class="field">
+                Find Available Rooms
 
-                <label>
-                    Start Time
-                </label>
-
-                <input
-                    type="time"
-                    name="time"
-                    required
-                    value="{{ selected_time or '' }}"
-                >
-
-            </div>
+            </button>
 
 
-
-            <div class="field">
-
-                <label>
-                    Duration
-                </label>
-
-                <select
-                    name="duration"
-                    required
-                >
-
-                    <option value="">
-                        Select duration
-                    </option>
-
-                    <option value="1"
-                        {% if selected_duration == "1" %}selected{% endif %}>
-                        1 hour
-                    </option>
-
-                    <option value="2"
-                        {% if selected_duration == "2" %}selected{% endif %}>
-                        2 hours
-                    </option>
-
-                    <option value="3"
-                        {% if selected_duration == "3" %}selected{% endif %}>
-                        3 hours
-                    </option>
-
-                </select>
-
-            </div>
+        </form>
 
 
-        </div>
-
-
-        <button
-            type="submit"
-            class="search-button"
-        >
-
-            Find Available Rooms
-
-        </button>
-
-
-    </form>
-
-
-    {% if rooms %}
+        {% if rooms %}
 
         <div class="room-grid">
 
             {% for room in rooms %}
 
-                <div class="room-card">
+            <div class="room-card">
+                {% if room_conflicts and room["id"] in room_conflicts %}
+                <div class="availability-badge conflict-badge">
+                    Faculty Priority
+                </div>
+                {% else %}
+                <div class="availability-badge">
+                    Available
+                </div>
+                {% endif %}
 
-                    <h2>
-                        {{ room["name"] }}
-                    </h2>
+                <h2>
+                    {{ room["name"] }}
+                </h2>
 
-                    {% if room_conflicts and room["id"] in room_conflicts %}
-                        <div style="
+                {% if room_conflicts and room["id"] in room_conflicts %}
+                <div style="
                             margin-bottom: 14px;
                             padding: 10px 12px;
                             background: #fff7ed;
@@ -427,46 +427,43 @@
                             font-size: 13px;
                             font-weight: 600;
                         ">
-                            {{ room_conflicts[room["id"]] }}
-                        </div>
-                    {% endif %}
+                    {{ room_conflicts[room["id"]] }}
+                </div>
+                {% endif %}
 
-                    <div class="room-info">
+                <div class="room-info">
 
-                        <div>
-                            <strong>Type:</strong>
-                            {{ room["room_type"] }}
-                        </div>
-
-                        <div>
-                            <strong>Capacity:</strong>
-                            {{ room["capacity"] }}
-                        </div>
-
-                        <div>
-                            <strong>Floor:</strong>
-                            {{ room["floor"] }}
-                        </div>
-
+                    <div>
+                        <strong>Type:</strong>
+                        {{ room["room_type"] }}
                     </div>
 
+                    <div>
+                        <strong>Capacity:</strong>
+                        {{ room["capacity"] }}
+                    </div>
 
-                    <a
-                        href="/book-room?room_id={{ room['id'] }}"
-                        class="book-button"
-                    >
-
-                        Book Room
-
-                    </a>
+                    <div>
+                        <strong>Floor:</strong>
+                        {{ room["floor"] }}
+                    </div>
 
                 </div>
+
+
+                <a href="/book-room?room_id={{ room['id'] }}" class="book-button">
+
+                    Book Room
+
+                </a>
+
+            </div>
 
             {% endfor %}
 
         </div>
 
-    {% else %}
+        {% else %}
 
         <div class="empty">
 
@@ -474,18 +471,18 @@
 
         </div>
 
-    {% endif %}
+        {% endif %}
 
 
-</main>
+    </main>
 
 
 
-<footer>
+    <footer>
 
-    CampusSpace · Room Booking System · 2026
+        CampusSpace · Room Booking System · 2026
 
-</footer>
+    </footer>
 
 
 
