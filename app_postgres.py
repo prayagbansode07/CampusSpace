@@ -293,7 +293,7 @@ def home():
 
     connection.close()
 
-    return render_template("index.html", rooms=rooms)
+    return render_template("index.html", rooms=rooms, available_spaces=len(rooms))
 
 # -----------------------------
 # HELP & SUPPORT
